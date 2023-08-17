@@ -5,6 +5,13 @@ CREATE TABLE Hospital (
      CONSTRAINT PK_HOSPITAL PRIMARY KEY(id_hospital)     
 );
 
+---- SEQUENCIA HOSPITAL ----
+CREATE SEQUENCE SEQ_HOSPITAL
+START WITH 2
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
 -- ////////////////////////////////// PESSOA ////////////////////////////////// --
 CREATE TABLE Pessoa(
     id_pessoa NUMBER (3) NOT NULL,
@@ -17,15 +24,13 @@ CREATE TABLE Pessoa(
      CONSTRAINT pk_Pessoa PRIMARY KEY (id_pessoa)
 );
 
-
-
-
-CREATE SEQUENCE seq_pessoa
+---- SEQUENCIA PESSOA ----
+CREATE SEQUENCE SEQ_PESSOA
 START WITH 1
 INCREMENT BY 1
 NOCACHE NOCYCLE;
 
--- ////////////////////////////////// PACIENTE ////////////////////////////////// --
+-- //////////////////////////////// PACIENTE ////////////////////////////////// --
 CREATE TABLE Paciente(
 	id_paciente NUMBER(3) NOT NULL,
 	id_hospital NUMBER(3) NOT NULL,
@@ -35,14 +40,15 @@ CREATE TABLE Paciente(
 	 CONSTRAINT FK_PACIENTE_PESSOA FOREIGN KEY (id_pessoa) REFERENCES Pessoa(id_pessoa)
 );
 
----- SEQUENCE PACIENTE ----
+---- SEQUENCIA PACIENTE ----
 CREATE SEQUENCE SEQ_PACIENTE
  START WITH     1
  INCREMENT BY   1
  NOCACHE
  NOCYCLE;
-	
--- ////////////////////////////////// FUNCIONÁRIO ////////////////////////////////// --
+
+
+-- ////////////////////////////// FUNCIONÁRIO ///////////////////////////////// --
 CREATE TABLE Funcionario (
 	id_funcionario NUMBER(10) NOT NULL,
 	id_hospital NUMBER(10) NOT NULL,
@@ -52,14 +58,14 @@ CREATE TABLE Funcionario (
  	 CONSTRAINT FK_FUNCIONARIO_PESSOA FOREIGN KEY (id_pessoa) REFERENCES Pessoa(id_pessoa)
 );
 
----- SEQUENCE FUNCIONARIO ----
+---- SEQUENCIA FUNCIONARIO ----
 CREATE SEQUENCE SEQ_FUNCIONARIO
  START WITH     1
  INCREMENT BY   1
  NOCACHE
  NOCYCLE;
 
--- ////////////////////////////////// MEDICO ////////////////////////////////// --	
+-- ///////////////////////////////// MEDICO /////////////////////////////////// --	
 CREATE TABLE Medico (
     id_pessoa NUMBER(10) NOT NULL,
     id_medico NUMBER(10) NOT NULL,
@@ -70,13 +76,14 @@ CREATE TABLE Medico (
      CONSTRAINT FK_MEDICO_HOSPITAL FOREIGN KEY (id_hospital) REFERENCES HOSPITAL(id_hospital)
 );
 
+---- SEQUENCIA MEDICO ----
 CREATE SEQUENCE SEQ_MEDICO
  START WITH     1
  INCREMENT BY   1
  NOCACHE
  NOCYCLE;
- 
--- ////////////////////////////////// ATENDIMENTO ////////////////////////////////// --	
+
+-- ////////////////////////////// ATENDIMENTO ///////////////////////////////// --	
 CREATE TABLE Atendimento(
     id_atendimento NUMBER(10) NOT NULL,
     id_hospital NUMBER(10) NOT NULL,
@@ -92,20 +99,24 @@ CREATE TABLE Atendimento(
      CONSTRAINT FK_ATENDIMENTO_MEDICO FOREIGN KEY(id_medico) REFERENCES MEDICO(id_medico)
 );
 
-
+---- SEQUENCIA ATENDIMENTO ----
 CREATE SEQUENCE SEQ_ATENDIMENTO
 START WITH 1
 INCREMENT BY 1
 NOCACHE
 NOCYCLE;
 
-CREATE SEQUENCE SEQ_HOSPITAL
-START WITH 2
-INCREMENT BY 1
+-- //////////////////////////////// USUARIO /////////////////////////////////// --
+CREATE TABLE USUARIO(
+    ID_USUARIO NUMBER NOT NULL,
+    LOGIN varchar2(512) UNIQUE NOT NULL,
+    SENHA varchar2(512) NOT NULL,
+    PRIMARY KEY(ID_USUARIO)
+);
+
+---- SEQUENCIA USUARIO ----
+CREATE SEQUENCE seq_usuario
+START WITH     1
+INCREMENT BY   1
 NOCACHE
 NOCYCLE;
-
-SELECT * FROM MEDICO m 
-
-SELECT * FROM MEDICO 
-INNER JOIN PESSOA ON MEDICO.ID_MEDICO = 3 AND PESSOA.ID_PESSOA = MEDICO.ID_PESSOA
