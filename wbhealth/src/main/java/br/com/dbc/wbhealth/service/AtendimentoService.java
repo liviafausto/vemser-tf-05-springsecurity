@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,14 +72,14 @@ public class AtendimentoService {
     public List<AtendimentoOutputDTO> findAll() throws BancoDeDadosException {
         return atendimentoRepository.findAll()
                 .stream()
-                .map(this::atendimentoEntityToAtendimentoOutput)
+                .map(this::convertToDTO)
                 .toList();
     }
 
     public AtendimentoOutputDTO findById(Integer idAtendimento) throws BancoDeDadosException, EntityNotFound {
         AtendimentoEntity atendimento = atendimentoRepository.getById(idAtendimento);
 
-        return atendimentoEntityToAtendimentoOutput(atendimento);
+        return convertToDTO(atendimento);
     }
 
     public List<AtendimentoOutputDTO> bucarAtendimentoPeloIdUsuario(Integer idPaciente) throws BancoDeDadosException {
@@ -119,19 +120,19 @@ public class AtendimentoService {
         }
     }
 
-    private AtendimentoOutputDTO atendimentoEntityToAtendimentoOutput(AtendimentoEntity atendimento) {
-        AtendimentoOutputDTO atendimentoOutputDTO = new AtendimentoOutputDTO();
-        atendimentoOutputDTO.setIdAtendimento(atendimento.getIdAtendimento());
-        atendimentoOutputDTO.setIdHospital(atendimento.getHospitalEntity().getIdHospital());
-        atendimentoOutputDTO.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
-        atendimentoOutputDTO.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
-        atendimentoOutputDTO.setLaudo(atendimento.getLaudo());
-        atendimentoOutputDTO.setValorDoAtendimento(atendimento.getValorDoAtendimento());
-        atendimentoOutputDTO.setTipoDeAtendimento(atendimento.getTipoDeAtendimento().name());
-        atendimentoOutputDTO.setDataAtendimento(atendimento.getDataAtendimento());
-
-        return atendimentoOutputDTO;
-    }
+//    private AtendimentoOutputDTO atendimentoEntityToAtendimentoOutput(AtendimentoEntity atendimento) {
+//        AtendimentoOutputDTO atendimentoOutputDTO = new AtendimentoOutputDTO();
+//        atendimentoOutputDTO.setIdAtendimento(atendimento.getIdAtendimento());
+//        atendimentoOutputDTO.setIdHospital(atendimento.getHospitalEntity().getIdHospital());
+//        atendimentoOutputDTO.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
+//        atendimentoOutputDTO.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
+//        atendimentoOutputDTO.setLaudo(atendimento.getLaudo());
+//        atendimentoOutputDTO.setValorDoAtendimento(atendimento.getValorDoAtendimento());
+//        atendimentoOutputDTO.setTipoDeAtendimento(atendimento.getTipoDeAtendimento().name());
+//        atendimentoOutputDTO.setDataAtendimento(atendimento.getDataAtendimento());
+//
+//        return atendimentoOutputDTO;
+//    }
 
     private AtendimentoEntity setFKInAtendimento(AtendimentoInputDTO atendimentoDTO) throws EntityNotFound {
         AtendimentoEntity atendimento = new AtendimentoEntity();
@@ -166,7 +167,7 @@ public class AtendimentoService {
 
     public Page<AtendimentoOutputDTO> findAllPaginada(Integer pagina, Integer quantidadeRegistros) {
         Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
-        return atendimentoRepository.findAll(paginacao).map(this::atendimentoEntityToAtendimentoOutput);
+        return atendimentoRepository.findAll(paginacao).map(this::convertToDTO);
     }
 
     public Page<AtendimentoOutputDTO> findAllPaginadaByData(String inicio,
@@ -183,6 +184,17 @@ public class AtendimentoService {
         }
 
         Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
-        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(dataInicio, dataFim, paginacao).map(this::atendimentoEntityToAtendimentoOutput);
+        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(dataInicio, dataFim, paginacao).map(this::convertToDTO);
+    }
+
+    private AtendimentoOutputDTO convertToDTO(AtendimentoEntity atendimento) {
+        AtendimentoOutputDTO atendimentoOutputDTO = objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class);
+
+        return atendimentoOutputDTO;
+    }
+
+    private List<AtendimentoOutputDTO> convertToDTOList(List<AtendimentoEntity> listaAtendimentos) {
+        return listaAtendimentos.stream()
+                .map(this::convertToDTO).collect(Collectors.toList());
     }
 }
