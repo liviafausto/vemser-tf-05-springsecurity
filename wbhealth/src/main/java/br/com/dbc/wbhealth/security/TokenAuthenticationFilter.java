@@ -1,6 +1,6 @@
 //package br.com.dbc.wbhealth.security;
 //
-//import br.com.dbc.vemser.pessoaapi.entity.UsuarioEntity;
+//import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 //import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,8 +20,11 @@
 //    private final String BEARER = "Bearer ";
 //
 //    @Override
-//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-//            throws ServletException, IOException {
+//    protected void doFilterInternal(
+//            HttpServletRequest request,
+//            HttpServletResponse response,
+//            FilterChain filterChain
+//    ) throws ServletException, IOException {
 //        String tokenFromHeader = getTokenFromHeader(request);
 //        Optional<UsuarioEntity> usuario = tokenService.isValid(tokenFromHeader);
 //
@@ -34,7 +37,11 @@
 //        if (optionalUsuarioEntity.isPresent()) {
 //            UsuarioEntity usuarioEntity = optionalUsuarioEntity.get();
 //            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-//                    new UsernamePasswordAuthenticationToken(usuarioEntity.getLogin(), usuarioEntity.getSenha(), Collections.emptyList());
+//                    new UsernamePasswordAuthenticationToken(
+//                            usuarioEntity.getLogin(),
+//                            usuarioEntity.getSenha(),
+//                            Collections.emptyList()
+//                    );
 //            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 //        } else {
 //            SecurityContextHolder.getContext().setAuthentication(null);
