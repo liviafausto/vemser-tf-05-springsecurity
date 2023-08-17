@@ -1,7 +1,7 @@
 //package br.com.dbc.wbhealth.security;
 //
-//import br.com.dbc.vemser.pessoaapi.entity.UsuarioEntity;
-//import br.com.dbc.vemser.pessoaapi.service.UsuarioService;
+//import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
+//import br.com.dbc.wbhealth.service.UsuarioService;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.stereotype.Service;
 //
@@ -16,8 +16,7 @@
 //
 //    public String getToken(UsuarioEntity usuarioEntity) {
 //        String tokenTexto = usuarioEntity.getLogin() + ";" + usuarioEntity.getSenha();
-//        String token = Base64.getEncoder().encodeToString(tokenTexto.getBytes());
-//        return token;
+//        return Base64.getEncoder().encodeToString(tokenTexto.getBytes());
 //    }
 //
 //    public Optional<UsuarioEntity> isValid(String token) {
