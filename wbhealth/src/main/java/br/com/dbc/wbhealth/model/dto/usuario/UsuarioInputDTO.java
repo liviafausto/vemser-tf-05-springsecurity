@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 @Data
 public class UsuarioInputDTO {
     @NotNull
-    @Schema(description = "Login de usuário", required = true, example = "jucabolinha")
+    @Schema(description = "Nome de usuário", required = true, example = "jucabolinha")
     private String login;
 
     @NotNull
