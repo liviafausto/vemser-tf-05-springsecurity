@@ -10,7 +10,6 @@ import br.com.dbc.wbhealth.model.entity.HospitalEntity;
 import br.com.dbc.wbhealth.model.entity.MedicoEntity;
 import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
-import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -32,20 +31,14 @@ public class AtendimentoService {
 
     private final ObjectMapper objectMapper;
 
-    private final EmailService emailService;
-
     private final PacienteService pacienteService;
 
     private final MedicoService medicoService;
 
     private final HospitalService hospitalService;
 
-    private void enviarEmails(AtendimentoEntity atendimento, TipoEmail tipo) throws MessagingException, BancoDeDadosException, EntityNotFound {
-        emailService.sendEmailAtendimento(atendimento, tipo);
 
-    }
-
-    private void verificarIdentificadores(AtendimentoInputDTO atendimentoDeEntrada) throws BancoDeDadosException, EntityNotFound {
+    private void verificarIdentificadores(AtendimentoInputDTO atendimentoDeEntrada) throws EntityNotFound {
         Integer idPaciente = atendimentoDeEntrada.getIdPaciente();
         Integer idHospital = atendimentoDeEntrada.getIdHospital();
         Integer idMedico = atendimentoDeEntrada.getIdMedico();
@@ -55,98 +48,58 @@ public class AtendimentoService {
         pacienteService.findById(idPaciente);
     }
 
-    public AtendimentoOutputDTO save(AtendimentoInputDTO atendimentoNovo) throws BancoDeDadosException, EntityNotFound, MessagingException {
+    public AtendimentoOutputDTO save(AtendimentoInputDTO atendimentoNovo) throws EntityNotFound {
         verificarIdentificadores(atendimentoNovo);
-
-        AtendimentoEntity atendimento = setFKInAtendimento(atendimentoNovo);
-
+        AtendimentoEntity atendimento = convertInputToEntityWithoutID(atendimentoNovo);
         atendimento = atendimentoRepository.save(atendimento);
 
-        enviarEmails(atendimento, TipoEmail.CONFIRMACAO);
-
-        AtendimentoOutputDTO atendimentoOutputDTO = setFKInAtendimentoDTO(objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class), atendimento);
-
-        return atendimentoOutputDTO;
+        return convertToOutputDTO(atendimento);
     }
 
-    public List<AtendimentoOutputDTO> findAll() throws BancoDeDadosException {
-        return atendimentoRepository.findAll()
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+    public List<AtendimentoOutputDTO> findAll() {
+        return convertToDTOList(atendimentoRepository.findAll());
     }
 
-    public AtendimentoOutputDTO findById(Integer idAtendimento) throws BancoDeDadosException, EntityNotFound {
-        AtendimentoEntity atendimento = atendimentoRepository.getById(idAtendimento);
-
-        return convertToDTO(atendimento);
+    public AtendimentoOutputDTO findById(Integer idAtendimento) throws EntityNotFound {
+        AtendimentoEntity atendimentoEntity = atendimentoRepository.findById(idAtendimento)
+                .orElseThrow(() -> new EntityNotFound("Atendimento não encontrado"));
+        return convertToOutputDTO(atendimentoEntity);
     }
 
-    public List<AtendimentoOutputDTO> bucarAtendimentoPeloIdUsuario(Integer idPaciente) throws BancoDeDadosException {
+    public List<AtendimentoOutputDTO> bucarAtendimentoPeloIdUsuario(Integer idPaciente) throws EntityNotFound {
+        pacienteService.findById(idPaciente);
         return findAll()
                 .stream()
                 .filter(atendimento -> atendimento.getIdPaciente().equals(idPaciente))
                 .toList();
     }
 
-    public AtendimentoOutputDTO update(Integer idAtendimento, AtendimentoInputDTO atendimentoAtualizado) throws BancoDeDadosException, EntityNotFound, MessagingException {
+    public AtendimentoOutputDTO update(Integer idAtendimento, AtendimentoInputDTO atendimentoAtualizado) throws EntityNotFound {
+        findById(idAtendimento);
         verificarIdentificadores(atendimentoAtualizado);
 
-        AtendimentoEntity atendimentoConvertido = setFKInAtendimento(atendimentoAtualizado);
-
-        atendimentoConvertido.setLaudo(atendimentoConvertido.getLaudo());
-        atendimentoConvertido.setTipoDeAtendimento(TipoDeAtendimento.valueOf(atendimentoAtualizado.getTipoDeAtendimento()));
-        atendimentoConvertido.setDataAtendimento(atendimentoAtualizado.getDataAtendimento());
+        AtendimentoEntity atendimentoConvertido = convertInputToEntityWithoutID(atendimentoAtualizado);
+        atendimentoConvertido.setIdAtendimento(idAtendimento);
 
         atendimentoConvertido = atendimentoRepository.save(atendimentoConvertido);
 
-        enviarEmails(atendimentoConvertido, TipoEmail.ATUALIZACAO);
-
-        AtendimentoOutputDTO atendimentoOutputDTO = this.setFKInAtendimentoDTO(objectMapper.convertValue(atendimentoAtualizado, AtendimentoOutputDTO.class), atendimentoConvertido);
-
-        return atendimentoOutputDTO;
+        return convertToOutputDTO(atendimentoConvertido);
     }
 
     public void deletarPeloId(Integer idAtendimento) throws EntityNotFound {
-        try {
-            AtendimentoInputDTO atendimento = objectMapper.convertValue(findById(idAtendimento), AtendimentoInputDTO.class);
-
-            atendimentoRepository.deleteById(idAtendimento);
-
-            enviarEmails(atendimentoRepository.getById(idAtendimento), TipoEmail.CANCELAMENTO);
-
-        } catch (BancoDeDadosException | MessagingException e) {
-            throw new RuntimeException(e);
-        }
+        findById(idAtendimento);
+        atendimentoRepository.deleteById(idAtendimento);
     }
 
-//    private AtendimentoOutputDTO atendimentoEntityToAtendimentoOutput(AtendimentoEntity atendimento) {
-//        AtendimentoOutputDTO atendimentoOutputDTO = new AtendimentoOutputDTO();
-//        atendimentoOutputDTO.setIdAtendimento(atendimento.getIdAtendimento());
-//        atendimentoOutputDTO.setIdHospital(atendimento.getHospitalEntity().getIdHospital());
-//        atendimentoOutputDTO.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
-//        atendimentoOutputDTO.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
-//        atendimentoOutputDTO.setLaudo(atendimento.getLaudo());
-//        atendimentoOutputDTO.setValorDoAtendimento(atendimento.getValorDoAtendimento());
-//        atendimentoOutputDTO.setTipoDeAtendimento(atendimento.getTipoDeAtendimento().name());
-//        atendimentoOutputDTO.setDataAtendimento(atendimento.getDataAtendimento());
-//
-//        return atendimentoOutputDTO;
-//    }
-
-    private AtendimentoEntity setFKInAtendimento(AtendimentoInputDTO atendimentoDTO) throws EntityNotFound {
+    private AtendimentoEntity convertInputToEntityWithoutID(AtendimentoInputDTO atendimentoDTO) throws EntityNotFound {
         AtendimentoEntity atendimento = new AtendimentoEntity();
 
-        HospitalEntity hospital = objectMapper.convertValue(hospitalService.findById(atendimentoDTO.getIdHospital()), HospitalEntity.class);
-
+        HospitalEntity hospital = hospitalService.getHospitalById(atendimentoDTO.getIdHospital());
         MedicoEntity medico = medicoService.getMedicoById(atendimentoDTO.getIdMedico());
-
         PacienteEntity paciente = pacienteService.getPacienteById(atendimentoDTO.getIdPaciente());
 
         atendimento.setPacienteEntity(paciente);
-
         atendimento.setMedicoEntity(medico);
-
         atendimento.setHospitalEntity(hospital);
 
         atendimento.setLaudo(atendimentoDTO.getLaudo());
@@ -161,13 +114,12 @@ public class AtendimentoService {
         atendimentoOutputDTO.setIdHospital(atendimento.getHospitalEntity().getIdHospital());
         atendimentoOutputDTO.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
         atendimentoOutputDTO.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
-
         return atendimentoOutputDTO;
     }
 
     public Page<AtendimentoOutputDTO> findAllPaginada(Integer pagina, Integer quantidadeRegistros) {
         Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
-        return atendimentoRepository.findAll(paginacao).map(this::convertToDTO);
+        return atendimentoRepository.findAll(paginacao).map(this::convertToOutputDTO);
     }
 
     public Page<AtendimentoOutputDTO> findAllPaginadaByData(String inicio,
@@ -184,17 +136,16 @@ public class AtendimentoService {
         }
 
         Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
-        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(dataInicio, dataFim, paginacao).map(this::convertToDTO);
+        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(dataInicio, dataFim, paginacao).map(this::convertToOutputDTO);
     }
 
-    private AtendimentoOutputDTO convertToDTO(AtendimentoEntity atendimento) {
-        AtendimentoOutputDTO atendimentoOutputDTO = objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class);
-
-        return atendimentoOutputDTO;
+    private AtendimentoOutputDTO convertToOutputDTO(AtendimentoEntity entity) {
+        AtendimentoOutputDTO atendimentoOutputDTO = objectMapper.convertValue(entity, AtendimentoOutputDTO.class);
+        return setFKInAtendimentoDTO(atendimentoOutputDTO, entity);
     }
 
     private List<AtendimentoOutputDTO> convertToDTOList(List<AtendimentoEntity> listaAtendimentos) {
         return listaAtendimentos.stream()
-                .map(this::convertToDTO).collect(Collectors.toList());
+                .map(this::convertToOutputDTO).collect(Collectors.toList());
     }
 }

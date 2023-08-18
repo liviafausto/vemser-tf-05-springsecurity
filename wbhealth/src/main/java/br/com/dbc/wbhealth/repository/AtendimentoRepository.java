@@ -19,8 +19,6 @@ public interface AtendimentoRepository extends JpaRepository<AtendimentoEntity, 
 
     boolean existsById(Integer id);
 
-//    List<AtendimentoEntity> findByPaciente(PacienteEntity paciente);
-
     @Query("SELECT COUNT(a) FROM ATENDIMENTO a " +
             "WHERE a.medicoEntity = :medico " +
             "AND a.dataAtendimento BETWEEN :dataInicio AND :dataFim")

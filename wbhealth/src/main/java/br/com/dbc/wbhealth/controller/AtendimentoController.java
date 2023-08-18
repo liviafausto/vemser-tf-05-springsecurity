@@ -29,17 +29,17 @@ public class AtendimentoController implements AtendimentoControllerDoc {
     private final AtendimentoService atendimentoService;
 
     @GetMapping
-    public ResponseEntity<List<AtendimentoOutputDTO>> findAll() throws BancoDeDadosException {
+    public ResponseEntity<List<AtendimentoOutputDTO>> findAll() {
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAll());
     }
 
     @GetMapping("/{idAtendimento}")
-    public ResponseEntity<AtendimentoOutputDTO> buscarAtendimentoPeloId(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento) throws BancoDeDadosException, EntityNotFound {
+    public ResponseEntity<AtendimentoOutputDTO> buscarAtendimentoPeloId(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento) throws EntityNotFound {
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findById(idAtendimento));
     }
 
     @GetMapping("/paciente/{idPaciente}")
-    public ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdUsuario(@Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente) throws BancoDeDadosException {
+    public ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdUsuario(@Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente) throws EntityNotFound {
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.bucarAtendimentoPeloIdUsuario(idPaciente));
     }
 
@@ -47,7 +47,7 @@ public class AtendimentoController implements AtendimentoControllerDoc {
     public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginada(
             @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
             @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
-    ){
+    ) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(atendimentoService.findAllPaginada(pagina, quantidadeRegistros));
     }
@@ -64,13 +64,13 @@ public class AtendimentoController implements AtendimentoControllerDoc {
     }
 
     @PostMapping
-    public ResponseEntity<AtendimentoOutputDTO> save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws BancoDeDadosException, EntityNotFound, MessagingException {
+    public ResponseEntity<AtendimentoOutputDTO> save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws EntityNotFound {
         return ResponseEntity.status(HttpStatus.CREATED).body(atendimentoService.save(novoAtendimento));
     }
 
     @PutMapping("/{idAtendimento}")
     public ResponseEntity<AtendimentoOutputDTO> alterarPeloId(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento,
-                                                              @Valid @RequestBody AtendimentoInputDTO atendimento) throws BancoDeDadosException, EntityNotFound, MessagingException {
+                                                              @Valid @RequestBody AtendimentoInputDTO atendimento) throws EntityNotFound {
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.update(idAtendimento, atendimento));
     }
 
