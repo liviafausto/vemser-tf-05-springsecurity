@@ -1,7 +1,7 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
-import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutDTO;
+import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
 import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
 import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
 import br.com.dbc.wbhealth.repository.UsuarioRepository;
@@ -15,7 +15,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
-
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
@@ -32,19 +31,17 @@ public class UsuarioService {
         return usuarioRepository.findByLogin(login);
     }
 
-    public UsuarioOutDTO create(UsuarioInputDTO usuarioDTO) throws RegraDeNegocioException {
-
+    public UsuarioOutputDTO create(UsuarioInputDTO usuarioDTO) throws RegraDeNegocioException {
         if(usuarioRepository.existsByLogin(usuarioDTO.getLogin())) {
             throw new RegraDeNegocioException("Nome de usuário já está em uso.");
         }
 
         String encodedPassword = passwordEncoder.encode(usuarioDTO.getSenha());
-        usuarioDTO.setSenha(encodedPassword);
+
         UsuarioEntity usuarioEntity = objectMapper.convertValue(usuarioDTO, UsuarioEntity.class);
+        usuarioEntity.setSenha(encodedPassword);
 
-        UsuarioOutDTO usuarioCreated = objectMapper.convertValue(usuarioRepository.save(usuarioEntity), UsuarioOutDTO.class);
-
-        return usuarioCreated;
+        return objectMapper.convertValue(usuarioRepository.save(usuarioEntity), UsuarioOutputDTO.class);
     }
 
 }

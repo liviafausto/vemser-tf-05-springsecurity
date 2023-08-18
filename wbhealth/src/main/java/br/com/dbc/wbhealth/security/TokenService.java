@@ -22,6 +22,7 @@ public class TokenService {
 
     @Value("${jwt.secret}")
     private String secret;
+
     public String generateToken(UsuarioEntity usuarioEntity) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + Long.parseLong(expiration));
@@ -37,7 +38,6 @@ public class TokenService {
     }
 
     public UsernamePasswordAuthenticationToken isValid(String token) {
-
         if (token != null) {
             Claims body = Jwts.parser()
                     .setSigningKey(secret)
@@ -45,12 +45,9 @@ public class TokenService {
                     .getBody();
             String user = body.get(Claims.ID, String.class);
             if (user != null) {
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
-                return usernamePasswordAuthenticationToken;
+                return new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
             }
         }
         return null;
-
     }
 }
