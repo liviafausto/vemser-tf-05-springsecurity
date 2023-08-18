@@ -1,31 +1,56 @@
-//package br.com.dbc.wbhealth.security;
-//
-//import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
-//import br.com.dbc.wbhealth.service.UsuarioService;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.Base64;
-//import java.util.Optional;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class TokenService {
-//    static final String HEADER_STRING = "Authorization";
-//    private final UsuarioService usuarioService;
-//
-//    public String getToken(UsuarioEntity usuarioEntity) {
-//        String tokenTexto = usuarioEntity.getLogin() + ";" + usuarioEntity.getSenha();
-//        return Base64.getEncoder().encodeToString(tokenTexto.getBytes());
-//    }
-//
-//    public Optional<UsuarioEntity> isValid(String token) {
-//        if(token == null){
-//            return Optional.empty();
-//        }
-//        byte[] decodedBytes = Base64.getUrlDecoder().decode(token);
-//        String decoded = new String(decodedBytes);
-//        String[] split = decoded.split(";");
-//        return usuarioService.findByLoginAndSenha(split[0], split[1]);
-//    }
-//}
+package br.com.dbc.wbhealth.security;
+
+import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.Date;
+
+@Service
+@RequiredArgsConstructor
+public class TokenService {
+    private static final String TOKEN_PREFIX = "Bearer";
+
+    @Value("${jwt.expiration}")
+    private String expiration;
+
+    @Value("${jwt.secret}")
+    private String secret;
+    public String generateToken(UsuarioEntity usuarioEntity) {
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + Long.parseLong(expiration));
+
+        return TOKEN_PREFIX + " " +
+                Jwts.builder()
+                        .setIssuer("wbhealth-api")
+                        .claim(Claims.ID, usuarioEntity.getIdUsuario().toString())
+                        .setIssuedAt(now)
+                        .setExpiration(exp)
+                        .signWith(SignatureAlgorithm.HS256, secret)
+                        .compact();
+    }
+
+    public UsernamePasswordAuthenticationToken isValid(String token) {
+
+        if (token != null) {
+            Claims body = Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                    .getBody();
+            String user = body.get(Claims.ID, String.class);
+            if (user != null) {
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                        new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+                return usernamePasswordAuthenticationToken;
+            }
+        }
+        return null;
+
+    }
+}
