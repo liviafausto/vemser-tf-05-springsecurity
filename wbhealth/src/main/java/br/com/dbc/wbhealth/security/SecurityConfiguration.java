@@ -65,6 +65,6 @@ public class SecurityConfiguration {
 
     @Bean
     public PasswordEncoder passwordEncoder(){
-        return new Argon2PasswordEncoder(Feito);
+        return new Argon2PasswordEncoder();
     }
 }
