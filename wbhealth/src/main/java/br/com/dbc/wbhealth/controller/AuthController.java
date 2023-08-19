@@ -1,7 +1,10 @@
 package br.com.dbc.wbhealth.controller;
 
+import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
+import br.com.dbc.wbhealth.model.dto.usuario.UsuarioLoginInputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
+import br.com.dbc.wbhealth.model.dto.usuario.UsuarioSenhaInputDTO;
 import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
 import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
 import br.com.dbc.wbhealth.security.TokenService;
@@ -14,10 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -31,7 +31,7 @@ public class AuthController {
     private final UsuarioService usuarioService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> auth(@RequestBody @Valid UsuarioInputDTO loginDTO) throws RegraDeNegocioException{
+    public ResponseEntity<String> login(@RequestBody @Valid UsuarioLoginInputDTO loginDTO) throws RegraDeNegocioException{
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getSenha());
 
@@ -51,7 +51,26 @@ public class AuthController {
 
     @PostMapping("/create-user")
     public ResponseEntity<UsuarioOutputDTO> createUser(@RequestBody @Valid UsuarioInputDTO usuarioDTO)
-            throws RegraDeNegocioException {
+            throws RegraDeNegocioException, EntityNotFound {
         return new ResponseEntity<>(usuarioService.create(usuarioDTO), HttpStatus.OK);
+    }
+
+    @PutMapping("/{idUsuario}")
+    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable("idUsuario") Integer id,
+                                             @Valid @RequestBody UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
+        return new ResponseEntity<>(usuarioService.update(id, usuarioInputDTO), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{idUsuario}")
+    public ResponseEntity<Void> remove(@PathVariable("idUsuario") Integer id) throws EntityNotFound {
+        usuarioService.remove(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("update-password/{idUsuario}")
+    public ResponseEntity<UsuarioOutputDTO> updatePassword(@PathVariable("idUsuario") Integer id,
+                                                   @Valid @RequestBody UsuarioSenhaInputDTO usuarioSenhaInputDTO) throws EntityNotFound {
+        usuarioService.updatePassword(id, usuarioSenhaInputDTO);
+        return ResponseEntity.ok().build();
     }
 }
