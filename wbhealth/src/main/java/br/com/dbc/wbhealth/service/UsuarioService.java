@@ -75,6 +75,11 @@ public class UsuarioService {
         }
     }
 
+    public void remove(Integer idUsuario) throws EntityNotFound {
+        UsuarioEntity usuario = findById(idUsuario);
+        usuarioRepository.delete(usuario);
+    }
+
     public UsuarioEntity convertToEntity(UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
         UsuarioEntity entity = objectMapper.convertValue(usuarioInputDTO, UsuarioEntity.class);
         Set<CargoEntity> cargos = new HashSet<>();

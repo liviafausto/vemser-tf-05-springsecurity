@@ -29,7 +29,7 @@ public class AuthController {
     private final UsuarioService usuarioService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> auth(@RequestBody @Valid UsuarioInputDTO loginDTO) throws RegraDeNegocioException{
+    public ResponseEntity<String> login(@RequestBody @Valid UsuarioInputDTO loginDTO) throws RegraDeNegocioException{
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getSenha());
 
@@ -57,5 +57,11 @@ public class AuthController {
     public ResponseEntity<UsuarioOutputDTO> update(@PathVariable("idUsuario") Integer id,
                                              @Valid @RequestBody UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
         return new ResponseEntity<>(usuarioService.update(id, usuarioInputDTO), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{idUsuario}")
+    public ResponseEntity<Void> remove(@PathVariable("idUsuario") Integer id) throws EntityNotFound {
+        usuarioService.remove(id);
+        return ResponseEntity.ok().build();
     }
 }
