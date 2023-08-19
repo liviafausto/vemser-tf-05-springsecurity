@@ -10,6 +10,7 @@ import br.com.dbc.wbhealth.repository.CargoRepository;
 import br.com.dbc.wbhealth.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,30 +41,59 @@ public class UsuarioService {
     }
 
     public UsuarioOutputDTO create(UsuarioInputDTO usuarioDTO) throws EntityNotFound, RegraDeNegocioException {
-        if(usuarioRepository.existsByLogin(usuarioDTO.getLogin())) {
+        if (usuarioRepository.existsByLogin(usuarioDTO.getLogin())) {
             throw new RegraDeNegocioException("Nome de usuário já está em uso.");
         }
 
-        String encodedPassword = passwordEncoder.encode(usuarioDTO.getSenha());
+        String senhaCriptografada = passwordEncoder.encode(usuarioDTO.getSenha());
 
-        UsuarioEntity usuarioEntity = objectMapper.convertValue(usuarioDTO, UsuarioEntity.class);
-        usuarioEntity.setSenha(encodedPassword);
+        UsuarioEntity usuarioEntity = convertToEntity(usuarioDTO);
+        usuarioEntity.setSenha(senhaCriptografada);
 
+        return convertToOutputDTO(usuarioRepository.save(usuarioEntity));
+    }
+
+    public UsuarioOutputDTO update(Integer id, UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
+        try {
+            UsuarioEntity usuarioDesatualizado = findById(id);
+            if (usuarioRepository.existsByLogin(usuarioInputDTO.getLogin())) {
+                if(usuarioDesatualizado.getLogin() != usuarioInputDTO.getLogin()){
+                    throw new RegraDeNegocioException("Nome de usuário é utilizado por outro usuário.");
+                }
+            }
+            UsuarioEntity entity = convertToEntity(usuarioInputDTO);
+            String senhaCriptografada = passwordEncoder.encode(usuarioInputDTO.getSenha());
+            entity.setSenha(senhaCriptografada);
+
+            BeanUtils.copyProperties(entity, usuarioDesatualizado, "idUsuario");
+
+            UsuarioEntity usuarioAtualizado = usuarioRepository.save(usuarioDesatualizado);
+
+            return convertToOutputDTO(usuarioAtualizado);
+        } catch (RegraDeNegocioException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public UsuarioEntity convertToEntity(UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
+        UsuarioEntity entity = objectMapper.convertValue(usuarioInputDTO, UsuarioEntity.class);
         Set<CargoEntity> cargos = new HashSet<>();
-        if (usuarioDTO.getCargos() != null) {
-            for (Integer idCargo : usuarioDTO.getCargos()) {
+        if (usuarioInputDTO.getCargos() != null) {
+            for (Integer idCargo : usuarioInputDTO.getCargos()) {
                 CargoEntity cargo = cargoService.findById(idCargo);
                 cargos.add(cargo);
             }
-            usuarioEntity.setCargos(cargos);
+            entity.setCargos(cargos);
         }
-        return convertToOutputDTO(usuarioRepository.save(usuarioEntity)) ;
+        entity.setCargos(cargos);
+        return entity;
     }
+
 
     public UsuarioOutputDTO convertToOutputDTO(UsuarioEntity entity) {
         UsuarioOutputDTO usuarioOutputDTO = objectMapper.convertValue(entity, UsuarioOutputDTO.class);
         Set<Integer> cargos = new HashSet<>();
-        for (CargoEntity cargo : entity.getCargos()){
+        for (CargoEntity cargo : entity.getCargos()) {
             cargos.add(cargo.getIdCargo());
         }
         usuarioOutputDTO.setCargos(cargos);

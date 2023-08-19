@@ -15,10 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -54,5 +51,11 @@ public class AuthController {
     public ResponseEntity<UsuarioOutputDTO> createUser(@RequestBody @Valid UsuarioInputDTO usuarioDTO)
             throws RegraDeNegocioException, EntityNotFound {
         return new ResponseEntity<>(usuarioService.create(usuarioDTO), HttpStatus.OK);
+    }
+
+    @PutMapping("/{idUsuario}")
+    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable("idUsuario") Integer id,
+                                             @Valid @RequestBody UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
+        return new ResponseEntity<>(usuarioService.update(id, usuarioInputDTO), HttpStatus.OK);
     }
 }
