@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.controller;
 
+import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
 import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
@@ -51,7 +52,7 @@ public class AuthController {
 
     @PostMapping("/create-user")
     public ResponseEntity<UsuarioOutputDTO> createUser(@RequestBody @Valid UsuarioInputDTO usuarioDTO)
-            throws RegraDeNegocioException {
+            throws RegraDeNegocioException, EntityNotFound {
         return new ResponseEntity<>(usuarioService.create(usuarioDTO), HttpStatus.OK);
     }
 }

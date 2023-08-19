@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 @Data
 public class UsuarioInputDTO {
@@ -14,4 +15,7 @@ public class UsuarioInputDTO {
     @NotNull
     @Schema(description = "Senha do usuário", required = true, example = "12345")
     private String senha;
+
+    @Schema(description = "Cargos do usuário")
+    private Set<Integer> cargos;
 }
