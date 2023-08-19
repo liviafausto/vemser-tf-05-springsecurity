@@ -3,6 +3,7 @@ package br.com.dbc.wbhealth.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,7 +28,12 @@ public class SecurityConfiguration {
                 .and().cors()
                 .and().csrf().disable()
                 .authorizeHttpRequests((authz) -> authz
-                        .antMatchers("/auth/login", "/auth/create-user", "/", "/auth/**").permitAll()
+                        .antMatchers("/auth/login").permitAll()
+                        .antMatchers("/auth/create-user").hasRole("ADMIN")
+                        .antMatchers(HttpMethod.GET, "/atedimnento/**").hasAnyRole("PACIENTE", "RECEPCAO", "ADMIN")
+                        .antMatchers(HttpMethod.GET, "/medico/**").hasAnyRole("RECEPCAO", "ADMIN")
+                        .antMatchers("/atedimnento/**", "/paciente/**").hasAnyRole("RECEPCAO", "ADMIN")
+                        .antMatchers("/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
         http.addFilterBefore(

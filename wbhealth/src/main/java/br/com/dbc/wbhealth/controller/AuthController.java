@@ -1,10 +1,8 @@
 package br.com.dbc.wbhealth.controller;
 
+import br.com.dbc.wbhealth.documentation.AuthControllerDoc;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
-import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
-import br.com.dbc.wbhealth.model.dto.usuario.UsuarioLoginInputDTO;
-import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
-import br.com.dbc.wbhealth.model.dto.usuario.UsuarioSenhaInputDTO;
+import br.com.dbc.wbhealth.model.dto.usuario.*;
 import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
 import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
 import br.com.dbc.wbhealth.security.TokenService;
@@ -16,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +24,7 @@ import javax.validation.Valid;
 @Validated
 @RequiredArgsConstructor
 @RequestMapping("/auth")
-public class AuthController {
+public class AuthController implements AuthControllerDoc {
     public final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final UsuarioService usuarioService;
