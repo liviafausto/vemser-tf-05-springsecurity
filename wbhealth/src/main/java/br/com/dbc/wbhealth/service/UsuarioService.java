@@ -3,6 +3,7 @@ package br.com.dbc.wbhealth.service;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
+import br.com.dbc.wbhealth.model.dto.usuario.UsuarioSenhaInputDTO;
 import br.com.dbc.wbhealth.model.entity.CargoEntity;
 import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
 import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
@@ -57,7 +58,7 @@ public class UsuarioService {
         try {
             UsuarioEntity usuarioDesatualizado = findById(id);
             if (usuarioRepository.existsByLogin(usuarioInputDTO.getLogin())) {
-                if(usuarioDesatualizado.getLogin() != usuarioInputDTO.getLogin()){
+                if (usuarioDesatualizado.getLogin() != usuarioInputDTO.getLogin()) {
                     throw new RegraDeNegocioException("Nome de usuário é utilizado por outro usuário.");
                 }
             }
@@ -73,6 +74,13 @@ public class UsuarioService {
         } catch (RegraDeNegocioException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void updatePassword(Integer id, UsuarioSenhaInputDTO usuarioSenhaInputDTO) throws EntityNotFound {
+        UsuarioEntity usuarioParaEditar = findById(id);
+        String senhaCriptografada = passwordEncoder.encode(usuarioSenhaInputDTO.getSenha());
+        usuarioParaEditar.setSenha(senhaCriptografada);
+        usuarioRepository.save(usuarioParaEditar);
     }
 
     public void remove(Integer idUsuario) throws EntityNotFound {
