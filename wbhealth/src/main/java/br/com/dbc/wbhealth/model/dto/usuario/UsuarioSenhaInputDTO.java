@@ -9,6 +9,6 @@ import javax.validation.constraints.NotNull;
 @Data
 public class UsuarioSenhaInputDTO {
     @NotNull
-    @Schema(description = "Senha do usuário", required = true, example = "12345")
+    @Schema(description = "Senha do usuário", required = true)
     private String senha;
 }
