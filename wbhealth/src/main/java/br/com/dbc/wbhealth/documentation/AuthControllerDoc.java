@@ -16,65 +16,66 @@ import javax.validation.Valid;
 
 public interface AuthControllerDoc {
 
-    @Operation(summary = "Autenticar um usuário.", description = "Autenticar um usuário.")
+    @Operation(summary = "Autenticar usuário", description = "Autentica um usuário através do login")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "Autenticar um usuário."),
-                    @ApiResponse(responseCode = "4034", description = "Usuário não encontrado."),
-                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
+                    @ApiResponse(responseCode = "200", description = "Usuário autenticado"),
+                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
     @PostMapping("/login")
-    ResponseEntity<String> login(@RequestBody @Valid UsuarioLoginInputDTO loginDTO) throws RegraDeNegocioException;
+    ResponseEntity<String>
+    login(@RequestBody @Valid UsuarioLoginInputDTO login) throws RegraDeNegocioException;
 
-    @Operation(summary = "Criar um usuário.", description = "Criar um usuário.")
+    @Operation(summary = "Criar usuário", description = "Cria um usuário com base nos dados fornecidos")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "Criar um usuário."),
-                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
-                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
+                    @ApiResponse(responseCode = "200", description = "Retorna dados do usuário criado"),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
     @PostMapping("/create-user")
-    ResponseEntity<UsuarioOutputDTO> createUser(@RequestBody @Valid UsuarioInputDTO usuarioDTO)
-            throws RegraDeNegocioException, EntityNotFound;
+    ResponseEntity<UsuarioOutputDTO>
+    create(@RequestBody @Valid UsuarioInputDTO usuario) throws RegraDeNegocioException, EntityNotFound;
 
-    @Operation(summary = "Criar um usuário.", description = "Criar um usuário.")
+    @Operation(summary = "Atualizar usuário", description = "Atualiza um usuário pelo id")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "Criar um usuário."),
-                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
-                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
+                    @ApiResponse(responseCode = "200", description = "Retorna os dados do usuário atualizado"),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
-    @PostMapping("/create-user")
     @PutMapping("/{idUsuario}")
-    ResponseEntity<UsuarioOutputDTO> update(@PathVariable("idUsuario") Integer id,
-                                            @Valid @RequestBody UsuarioInputDTO usuarioInputDTO) throws EntityNotFound;
+    ResponseEntity<UsuarioOutputDTO>
+    update(@PathVariable("idUsuario") Integer idUsuario,
+           @Valid @RequestBody UsuarioInputDTO usuario) throws EntityNotFound;
 
-    @Operation(summary = "Deletar um usuário pelo ID.", description = "Deletar um usuário pelo ID.")
+
+    @Operation(summary = "Atualizar senha", description = "Atualiza a senha de um usuário")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "Deletar um usuário pelo ID."),
-                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
-                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
+                    @ApiResponse(responseCode = "200", description = "Senha atualizada com sucesso"),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
-    @PostMapping("/create-user")
-    @DeleteMapping("/{idUsuario}")
-    ResponseEntity<Void> remove(@PathVariable("idUsuario") Integer id) throws EntityNotFound;
-
-
-    @Operation(summary = "Atualizar um usuário pelo ID.", description = "Atualizar um usuário pelo ID.")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(responseCode = "200", description = "Atualizar um usuário pelo ID."),
-                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
-                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
-            }
-    )
-    @PostMapping("/create-user")
     @PutMapping("update-password/{idUsuario}")
-    ResponseEntity<UsuarioOutputDTO> updatePassword(@PathVariable("idUsuario") Integer id,
-                                                    @Valid @RequestBody UsuarioSenhaInputDTO usuarioSenhaInputDTO) throws EntityNotFound;
+    ResponseEntity<Void>
+    updatePassword(@PathVariable("idUsuario") Integer idUsuario,
+                   @Valid @RequestBody UsuarioSenhaInputDTO usuario) throws EntityNotFound;
+
+    @Operation(summary = "Excluir usuário", description = "Exclui o usuário associado ao id fornecido.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Usuário excluído com sucesso"),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+            }
+    )
+    @DeleteMapping("/{idUsuario}")
+    ResponseEntity<Void>
+    remove(@PathVariable("idUsuario") Integer id) throws EntityNotFound;
 }

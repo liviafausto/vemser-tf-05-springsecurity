@@ -14,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +29,9 @@ public class AuthController implements AuthControllerDoc {
     private final UsuarioService usuarioService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid UsuarioLoginInputDTO loginDTO) throws RegraDeNegocioException{
+    public ResponseEntity<String> login(@RequestBody @Valid UsuarioLoginInputDTO login) throws RegraDeNegocioException{
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getSenha());
+                new UsernamePasswordAuthenticationToken(login.getLogin(), login.getSenha());
 
         Authentication authentication;
 
@@ -49,27 +48,30 @@ public class AuthController implements AuthControllerDoc {
     }
 
     @PostMapping("/create-user")
-    public ResponseEntity<UsuarioOutputDTO> createUser(@RequestBody @Valid UsuarioInputDTO usuarioDTO)
+    public ResponseEntity<UsuarioOutputDTO> create(@RequestBody @Valid UsuarioInputDTO usuario)
             throws RegraDeNegocioException, EntityNotFound {
-        return new ResponseEntity<>(usuarioService.create(usuarioDTO), HttpStatus.OK);
+        return new ResponseEntity<>(usuarioService.create(usuario), HttpStatus.OK);
     }
 
     @PutMapping("/{idUsuario}")
-    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable("idUsuario") Integer id,
-                                             @Valid @RequestBody UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
-        return new ResponseEntity<>(usuarioService.update(id, usuarioInputDTO), HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{idUsuario}")
-    public ResponseEntity<Void> remove(@PathVariable("idUsuario") Integer id) throws EntityNotFound {
-        usuarioService.remove(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<UsuarioOutputDTO> update(@PathVariable("idUsuario") Integer idUsuario,
+                                                   @Valid @RequestBody UsuarioInputDTO usuario)
+            throws EntityNotFound {
+        return new ResponseEntity<>(usuarioService.update(idUsuario, usuario), HttpStatus.OK);
     }
 
     @PutMapping("update-password/{idUsuario}")
-    public ResponseEntity<UsuarioOutputDTO> updatePassword(@PathVariable("idUsuario") Integer id,
-                                                   @Valid @RequestBody UsuarioSenhaInputDTO usuarioSenhaInputDTO) throws EntityNotFound {
-        usuarioService.updatePassword(id, usuarioSenhaInputDTO);
+    public ResponseEntity<Void> updatePassword(@PathVariable("idUsuario") Integer idUsuario,
+                                               @Valid @RequestBody UsuarioSenhaInputDTO usuario)
+            throws EntityNotFound {
+        usuarioService.updatePassword(idUsuario, usuario);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{idUsuario}")
+    public ResponseEntity<Void> remove(@PathVariable("idUsuario") Integer idUsuario) throws EntityNotFound {
+        usuarioService.remove(idUsuario);
+        return ResponseEntity.ok().build();
+    }
+
 }
