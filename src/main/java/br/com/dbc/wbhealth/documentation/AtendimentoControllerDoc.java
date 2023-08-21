@@ -62,7 +62,7 @@ public interface AtendimentoControllerDoc {
     ResponseEntity<List<AtendimentoOutputDTO>>
     bucarAtendimentoPeloIdUsuario(
             @Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente
-    ) throws BancoDeDadosException;
+    ) throws BancoDeDadosException, EntityNotFound;
 
     @Operation(summary = "Buscar atendimentos paginados.", description = "Busca todos os atendimentos registrados, porém, paginado.")
     @ApiResponses(
