@@ -24,16 +24,21 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        final String ADMIN = "ADMIN";
+        final String PACIENTE = "PACIENTE";
+        final String RECEPCAO = "RECEPCAO";
+
         http.headers().frameOptions().disable()
                 .and().cors()
                 .and().csrf().disable()
                 .authorizeHttpRequests((authz) -> authz
-                        .antMatchers("/auth/login").permitAll()
-                        .antMatchers("/auth/create-user").hasRole("ADMIN")
-                        .antMatchers(HttpMethod.GET, "/atedimnento/**").hasAnyRole("PACIENTE", "RECEPCAO", "ADMIN")
-                        .antMatchers(HttpMethod.GET, "/medico/**").hasAnyRole("RECEPCAO", "ADMIN")
-                        .antMatchers("/atedimnento/**", "/paciente/**").hasAnyRole("RECEPCAO", "ADMIN")
-                        .antMatchers("/**").hasRole("ADMIN")
+                        .antMatchers("/auth", "/auth/login").permitAll()
+                        .antMatchers("/auth/create-user").hasRole(ADMIN)
+                        .antMatchers(HttpMethod.GET, "/atendimento/paciente/**").hasAnyRole(PACIENTE, RECEPCAO, ADMIN)
+                        .antMatchers(HttpMethod.GET, "/medico/**").hasAnyRole(RECEPCAO, ADMIN)
+                        .antMatchers(HttpMethod.GET, "/hospital/**").hasAnyRole(RECEPCAO, ADMIN)
+                        .antMatchers("/atendimento/**", "/paciente/**").hasAnyRole(RECEPCAO, ADMIN)
+                        .antMatchers("/**").hasRole(ADMIN)
                         .anyRequest().authenticated()
                 );
         http.addFilterBefore(

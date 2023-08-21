@@ -15,6 +15,20 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 public interface AuthControllerDoc {
+    @Operation(
+            summary = "Consultar usuário autenticado",
+            description = "Informa qual usuário está autenticado no momento"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Retorna os dados do usuário autenticado"),
+                    @ApiResponse(responseCode = "400", description = "Nenhum usuário foi autenticado"),
+                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+            }
+    )
+    @GetMapping
+    ResponseEntity<UsuarioOutputDTO> getLoggedUser() throws RegraDeNegocioException, EntityNotFound;
 
     @Operation(summary = "Autenticar usuário", description = "Autentica um usuário através do login")
     @ApiResponses(

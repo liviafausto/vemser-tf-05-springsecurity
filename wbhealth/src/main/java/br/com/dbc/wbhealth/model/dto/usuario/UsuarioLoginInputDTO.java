@@ -9,10 +9,10 @@ import java.util.Set;
 @Data
 public class UsuarioLoginInputDTO {
     @NotNull
-    @Schema(description = "Nome de usuário", required = true, example = "jucabolinha")
+    @Schema(description = "Nome de usuário", required = true)
     private String login;
 
     @NotNull
-    @Schema(description = "Senha do usuário", required = true, example = "12345")
+    @Schema(description = "Senha do usuário", required = true)
     private String senha;
 }

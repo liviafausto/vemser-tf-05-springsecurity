@@ -2,7 +2,6 @@ package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
-import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInfoDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioSenhaInputDTO;
@@ -12,10 +11,8 @@ import br.com.dbc.wbhealth.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -30,58 +27,71 @@ public class UsuarioService {
     private final CargoService cargoService;
     private final ObjectMapper objectMapper;
 
-    public Optional<UsuarioEntity> findByLoginAndSenha(String login, String senha) {
-        return usuarioRepository.findByLoginAndSenha(login, senha);
-    }
-
     public UsuarioEntity findById(Integer idUsuario) throws EntityNotFound {
         return usuarioRepository.findById(idUsuario)
-                .orElseThrow(() ->
-                        new EntityNotFound("Usuário não encontrado!"));
+                .orElseThrow(() -> new EntityNotFound("Usuário não encontrado"));
     }
 
     public Optional<UsuarioEntity> findByLogin(String login) {
         return usuarioRepository.findByLogin(login);
     }
 
-    public UsuarioOutputDTO create(UsuarioInputDTO usuarioDTO) throws EntityNotFound, RegraDeNegocioException {
-        if (usuarioRepository.existsByLogin(usuarioDTO.getLogin())) {
+    public Integer getIdLoggedUser() throws RegraDeNegocioException {
+        String idEmString = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer idUsuario;
+
+        try{
+            idUsuario = Integer.parseInt(idEmString);
+        }catch (NumberFormatException e){
+            throw new RegraDeNegocioException("Não existe nenhum usuário logado");
+        }
+
+        return idUsuario;
+    }
+
+    public UsuarioOutputDTO getLoggedUser() throws RegraDeNegocioException, EntityNotFound {
+        UsuarioEntity usuario = findById(getIdLoggedUser());
+        return convertUsuarioToOutput(usuario);
+    }
+
+    public UsuarioOutputDTO create(UsuarioInputDTO usuarioInput) throws EntityNotFound, RegraDeNegocioException {
+        if (usuarioRepository.existsByLogin(usuarioInput.getLogin())) {
             throw new RegraDeNegocioException("Nome de usuário já está em uso.");
         }
 
-        String senhaCriptografada = passwordEncoder.encode(usuarioDTO.getSenha());
+        String senhaCriptografada = passwordEncoder.encode(usuarioInput.getSenha());
 
-        UsuarioEntity usuarioEntity = convertToEntity(usuarioDTO);
+        UsuarioEntity usuarioEntity = convertInputToUsuario(usuarioInput);
         usuarioEntity.setSenha(senhaCriptografada);
 
-        return convertToOutputDTO(usuarioRepository.save(usuarioEntity));
+        return convertUsuarioToOutput(usuarioRepository.save(usuarioEntity));
     }
 
-    public UsuarioOutputDTO update(Integer id, UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
+    public UsuarioOutputDTO update(Integer idUsuario, UsuarioInputDTO usuarioInput) throws EntityNotFound {
         try {
-            UsuarioEntity usuarioDesatualizado = findById(id);
-            if (usuarioRepository.existsByLogin(usuarioInputDTO.getLogin())) {
-                if (usuarioDesatualizado.getLogin() != usuarioInputDTO.getLogin()) {
+            UsuarioEntity usuarioDesatualizado = findById(idUsuario);
+            if (usuarioRepository.existsByLogin(usuarioInput.getLogin())) {
+                if (usuarioDesatualizado.getLogin() != usuarioInput.getLogin()) {
                     throw new RegraDeNegocioException("Nome de usuário é utilizado por outro usuário.");
                 }
             }
-            UsuarioEntity entity = convertToEntity(usuarioInputDTO);
-            String senhaCriptografada = passwordEncoder.encode(usuarioInputDTO.getSenha());
+            UsuarioEntity entity = convertInputToUsuario(usuarioInput);
+            String senhaCriptografada = passwordEncoder.encode(usuarioInput.getSenha());
             entity.setSenha(senhaCriptografada);
 
             BeanUtils.copyProperties(entity, usuarioDesatualizado, "idUsuario");
 
             UsuarioEntity usuarioAtualizado = usuarioRepository.save(usuarioDesatualizado);
 
-            return convertToOutputDTO(usuarioAtualizado);
+            return convertUsuarioToOutput(usuarioAtualizado);
         } catch (RegraDeNegocioException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void updatePassword(Integer id, UsuarioSenhaInputDTO usuarioSenhaInputDTO) throws EntityNotFound {
-        UsuarioEntity usuarioParaEditar = findById(id);
-        String senhaCriptografada = passwordEncoder.encode(usuarioSenhaInputDTO.getSenha());
+    public void updatePassword(Integer idUsuario, UsuarioSenhaInputDTO usuarioSenhaInput) throws EntityNotFound {
+        UsuarioEntity usuarioParaEditar = findById(idUsuario);
+        String senhaCriptografada = passwordEncoder.encode(usuarioSenhaInput.getSenha());
         usuarioParaEditar.setSenha(senhaCriptografada);
         usuarioRepository.save(usuarioParaEditar);
     }
@@ -91,7 +101,7 @@ public class UsuarioService {
         usuarioRepository.delete(usuario);
     }
 
-    public UsuarioEntity convertToEntity(UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
+    public UsuarioEntity convertInputToUsuario(UsuarioInputDTO usuarioInputDTO) throws EntityNotFound {
         UsuarioEntity entity = objectMapper.convertValue(usuarioInputDTO, UsuarioEntity.class);
         Set<CargoEntity> cargos = new HashSet<>();
         if (usuarioInputDTO.getCargos() != null) {
@@ -106,7 +116,7 @@ public class UsuarioService {
     }
 
 
-    public UsuarioOutputDTO convertToOutputDTO(UsuarioEntity entity) {
+    public UsuarioOutputDTO convertUsuarioToOutput(UsuarioEntity entity) {
         UsuarioOutputDTO usuarioOutputDTO = objectMapper.convertValue(entity, UsuarioOutputDTO.class);
         Set<Integer> cargos = new HashSet<>();
         for (CargoEntity cargo : entity.getCargos()) {
