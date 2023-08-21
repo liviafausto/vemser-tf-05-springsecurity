@@ -1,18 +1,21 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
+import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInfoDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioSenhaInputDTO;
 import br.com.dbc.wbhealth.model.entity.CargoEntity;
 import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
-import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
-import br.com.dbc.wbhealth.repository.CargoRepository;
 import br.com.dbc.wbhealth.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
