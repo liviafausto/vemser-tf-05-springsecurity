@@ -40,7 +40,7 @@ public class EmailService {
     public void enviarEmailUsuarioCriado(PessoaEntity pessoa, UsuarioInputDTO usuario, String cargo) throws MessagingException {
         String assunto = "Cadastro realizado - WB Health";
         String nomeTemplate = "email-template-usuario-criado.ftl";
-        String endpointUpdatePassword = "http://localhost:8080/swagger-ui/index.html#/auth-controller/updatePassword";
+        String endpointUpdatePassword = "http://vemser-hml.dbccompany.com.br:39000/liviafausto/vemser-tf-05-springsecurity/swagger-ui/index.html#/auth-controller/updatePassword";
 
         Map<String, String> dados = new HashMap<>();
         dados.put("nome", pessoa.getNome());
