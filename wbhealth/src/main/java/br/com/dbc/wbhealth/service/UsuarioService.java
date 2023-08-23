@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 
 @Service
@@ -52,6 +53,10 @@ public class UsuarioService {
     public UsuarioOutputDTO getLoggedUser() throws RegraDeNegocioException, EntityNotFound {
         UsuarioEntity usuario = findById(getIdLoggedUser());
         return convertUsuarioToOutput(usuario);
+    }
+
+    public boolean existsByLogin(String login){
+        return usuarioRepository.existsByLogin(login);
     }
 
     public UsuarioOutputDTO create(UsuarioInputDTO usuarioInput) throws EntityNotFound, RegraDeNegocioException {
@@ -115,7 +120,6 @@ public class UsuarioService {
         return entity;
     }
 
-
     public UsuarioOutputDTO convertUsuarioToOutput(UsuarioEntity entity) {
         UsuarioOutputDTO usuarioOutputDTO = objectMapper.convertValue(entity, UsuarioOutputDTO.class);
         Set<Integer> cargos = new HashSet<>();
@@ -124,6 +128,12 @@ public class UsuarioService {
         }
         usuarioOutputDTO.setCargos(cargos);
         return usuarioOutputDTO;
+    }
+
+    public String generateRandomPassword(){
+        Random random = new Random();
+        Integer randomNumber = random.nextInt(1000, 9999);
+        return String.valueOf(randomNumber);
     }
 
 }
