@@ -4,6 +4,7 @@ import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
+import br.com.dbc.wbhealth.model.dto.medico.MedicoNovoOutputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +14,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -57,8 +59,8 @@ public interface MedicoControllerDoc {
             }
     )
     @PostMapping()
-    ResponseEntity<MedicoOutputDTO>
-    save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) throws BancoDeDadosException, EntityNotFound;
+    ResponseEntity<MedicoNovoOutputDTO>
+    save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) throws BancoDeDadosException, EntityNotFound, MessagingException;
 
 
     @Operation(summary = "Atualizar medico", description = "Atualiza o medico correspondente ao id passado via pathVariable com os dados passados pelo InputDTO e salva no sistema")

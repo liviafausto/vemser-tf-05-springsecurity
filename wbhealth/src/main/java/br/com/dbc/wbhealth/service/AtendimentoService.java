@@ -1,6 +1,5 @@
 package br.com.dbc.wbhealth.service;
 
-import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
@@ -18,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
