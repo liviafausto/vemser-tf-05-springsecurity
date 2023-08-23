@@ -63,7 +63,7 @@ public class PacienteService {
             throw new BancoDeDadosException("CPF já cadastrado.");
         }
 
-        UsuarioInputDTO usuarioInput = criarUsuarioInputParaPaciente(pacienteInput.getCpf());
+        UsuarioInputDTO usuarioInput = usuarioService.criarUsuarioInput(pacienteInput.getCpf(), 3);
         UsuarioOutputDTO usuarioOutput = usuarioService.create(usuarioInput);
 
         PessoaEntity pessoaCriada = pessoaRepository.save(pessoa);
@@ -71,7 +71,7 @@ public class PacienteService {
         PacienteEntity paciente = convertInputToPaciente(pessoaCriada, pacienteInput);
         PacienteEntity pacienteCriado = pacienteRepository.save(paciente);
 
-        emailService.enviarEmailUsuarioCriado(pacienteCriado.getPessoa(), usuarioInput, "PACIENTE");
+//        emailService.enviarEmailUsuarioCriado(pacienteCriado.getPessoa(), usuarioInput, "PACIENTE");
         return convertToPacienteNovoOutput(pacienteCriado, usuarioOutput);
     }
 

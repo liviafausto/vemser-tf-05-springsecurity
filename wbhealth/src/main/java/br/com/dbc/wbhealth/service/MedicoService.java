@@ -2,12 +2,14 @@ package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
-import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
-import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
-import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
-import br.com.dbc.wbhealth.model.dto.medico.PeriodoDTO;
+import br.com.dbc.wbhealth.model.dto.medico.*;
+import br.com.dbc.wbhealth.model.dto.paciente.PacienteNovoOutputDTO;
+import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
+import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
+import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
 import br.com.dbc.wbhealth.model.entity.HospitalEntity;
 import br.com.dbc.wbhealth.model.entity.MedicoEntity;
+import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.entity.PessoaEntity;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import br.com.dbc.wbhealth.repository.MedicoRepository;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,21 +33,23 @@ public class MedicoService {
     private final MedicoRepository medicoRepository;
     private final PessoaRepository pessoaRepository;
     private final AtendimentoRepository atendimentoRepository;
+    private final UsuarioService usuarioService;
     private final HospitalService hospitalService;
+    private final EmailService emailService;
     private final ObjectMapper objectMapper;
 
     public Page<MedicoOutputDTO> findAll(Integer pagina, Integer quantidadeRegistros){
         Sort ordenacao = Sort.by("idMedico");
         Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
-        return medicoRepository.findAll(pageable).map(this::converterMedicoOutput);
+        return medicoRepository.findAll(pageable).map(this::convertMedicoToOutput);
     }
 
     public MedicoOutputDTO findById(Integer idMedico) throws EntityNotFound {
         MedicoEntity medicoEncontrado = getMedicoById(idMedico);
-        return converterMedicoOutput(medicoEncontrado);
+        return convertMedicoToOutput(medicoEncontrado);
     }
 
-    public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO) throws BancoDeDadosException, EntityNotFound {
+    public MedicoNovoOutputDTO save(MedicoInputDTO medicoInputDTO) throws BancoDeDadosException, EntityNotFound, MessagingException {
 
         PessoaEntity pessoaEntity = convertInputToPessoa(medicoInputDTO);
         if (pessoaRepository.existsByCpf(pessoaEntity.getCpf())) {
@@ -54,12 +59,17 @@ public class MedicoService {
             throw new BancoDeDadosException("CRM já cadastrado.");
         }
 
-        PessoaEntity pessoaSave = pessoaRepository.save(pessoaEntity);
+        UsuarioInputDTO usuarioInput = usuarioService.criarUsuarioInput(medicoInputDTO.getCpf(), 4);
+        UsuarioOutputDTO usuarioOutput = usuarioService.create(usuarioInput);
 
-        MedicoEntity medico = convertInputToMedico(pessoaSave, medicoInputDTO);
-        MedicoEntity medicoAtualizado = medicoRepository.save(medico);
+        PessoaEntity pessoaCriada = pessoaRepository.save(pessoaEntity);
 
-        return converterMedicoOutput(medicoAtualizado);
+        MedicoEntity medico = convertInputToMedico(pessoaCriada, medicoInputDTO);
+        MedicoEntity medicoCriado = medicoRepository.save(medico);
+
+        emailService.enviarEmailUsuarioCriado(medicoCriado.getPessoa(), usuarioInput, "MEDICO");
+
+        return convertToMedicoNovoOutput(medicoCriado, usuarioOutput);
     }
 
     public MedicoOutputDTO update(Integer idMedico, MedicoInputDTO medicoInput) throws EntityNotFound {
@@ -79,7 +89,7 @@ public class MedicoService {
         pessoaRepository.save(medico.getPessoa());
         MedicoEntity medicoAtualizado = medicoRepository.save(medico);
 
-        return converterMedicoOutput(medicoAtualizado);
+        return convertMedicoToOutput(medicoAtualizado);
     }
 
     public void delete(Integer idMedico) throws EntityNotFound {
@@ -115,11 +125,7 @@ public class MedicoService {
         return medico;
     }
 
-    public MedicoOutputDTO converterMedicoOutput(MedicoEntity medico) {
-        MedicoOutputDTO medicoOutput = objectMapper.convertValue(medico, MedicoOutputDTO.class);
-        medicoOutput.setIdHospital(medico.getHospitalEntity().getIdHospital());
-
-        PessoaEntity pessoa = medico.getPessoa();
+    public void converterMedicoOutput(MedicoOutputDTO medicoOutput, PessoaEntity pessoa) {
         medicoOutput.setNome(pessoa.getNome());
         medicoOutput.setCep(pessoa.getCep());
         medicoOutput.setDataNascimento(pessoa.getDataNascimento());
@@ -128,7 +134,25 @@ public class MedicoService {
         medicoOutput.setEmail(pessoa.getEmail());
         medicoOutput.setIdPessoa(pessoa.getIdPessoa());
 
+    }
+
+    private MedicoOutputDTO convertMedicoToOutput(MedicoEntity medico){
+        MedicoOutputDTO medicoOutput = objectMapper.convertValue(medico, MedicoOutputDTO.class);
+
+        medicoOutput.setIdHospital(medico.getHospitalEntity().getIdHospital());
+        converterMedicoOutput(medicoOutput, medico.getPessoa());
+
         return medicoOutput;
+    }
+
+    private MedicoNovoOutputDTO convertToMedicoNovoOutput(MedicoEntity medico, UsuarioOutputDTO usuario){
+        MedicoNovoOutputDTO medicoNovoOutput = objectMapper.convertValue(medico, MedicoNovoOutputDTO.class);
+
+        medicoNovoOutput.setIdHospital(medico.getHospitalEntity().getIdHospital());
+        converterMedicoOutput(medicoNovoOutput, medico.getPessoa());
+        medicoNovoOutput.setUsuario(usuario);
+
+        return medicoNovoOutput;
     }
 
     public List<MedicoAtendimentoDTO> generateMedicoAtendimento(Integer idMedico,

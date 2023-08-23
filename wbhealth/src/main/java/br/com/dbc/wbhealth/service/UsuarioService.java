@@ -132,5 +132,16 @@ public class UsuarioService {
         return String.valueOf(randomNumber);
     }
 
+    protected UsuarioInputDTO criarUsuarioInput(String login, Integer cargo){
+        UsuarioInputDTO usuarioInput = new UsuarioInputDTO();
+
+        usuarioInput.setLogin(login);
+        usuarioInput.setSenha(generateRandomPassword());
+        usuarioInput.setCargos(new HashSet<>());
+        usuarioInput.getCargos().add(cargo);
+
+        return usuarioInput;
+    }
+
 }
 
