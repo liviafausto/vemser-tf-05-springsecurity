@@ -92,6 +92,7 @@ CREATE TABLE Atendimento(
     data_atendimento DATE NOT NULL,
     laudo VARCHAR2(100) NOT NULL,
     tipo_de_atendimento VARCHAR2(10) NOT NULL,
+    receita VARCHAR2(250),
     valor_atendimento NUMBER(7,2) NOT NULL,
      CONSTRAINT PK_ATENDIMENTO PRIMARY KEY(id_atendimento),
      CONSTRAINT FK_ATENDIMENTO_HOSPITAL FOREIGN KEY(id_hospital) REFERENCES HOSPITAL(id_hospital),
