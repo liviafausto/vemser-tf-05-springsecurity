@@ -71,7 +71,7 @@ public class PacienteService {
         PacienteEntity paciente = convertInputToPaciente(pessoaCriada, pacienteInput);
         PacienteEntity pacienteCriado = pacienteRepository.save(paciente);
 
-//        emailService.enviarEmailUsuarioCriado(pacienteCriado.getPessoa(), usuarioInput, "PACIENTE");
+        emailService.enviarEmailUsuarioCriado(pacienteCriado.getPessoa(), usuarioInput, "PACIENTE");
         return convertToPacienteNovoOutput(pacienteCriado, usuarioOutput);
     }
 
