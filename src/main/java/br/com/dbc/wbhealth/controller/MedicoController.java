@@ -5,6 +5,7 @@ import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
+import br.com.dbc.wbhealth.model.dto.medico.MedicoNovoOutputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
 import br.com.dbc.wbhealth.service.MedicoService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -43,9 +45,9 @@ public class MedicoController implements MedicoControllerDoc {
     }
 
     @PostMapping()
-    public ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO)
-            throws BancoDeDadosException, EntityNotFound {
-        MedicoOutputDTO medicoCriado = medicoService.save(medicoInputDTO);
+    public ResponseEntity<MedicoNovoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO)
+            throws BancoDeDadosException, EntityNotFound, MessagingException {
+        MedicoNovoOutputDTO medicoCriado = medicoService.save(medicoInputDTO);
         return new ResponseEntity<>(medicoCriado, HttpStatus.OK);
     }
 

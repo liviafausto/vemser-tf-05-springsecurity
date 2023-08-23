@@ -47,6 +47,7 @@ public interface AuthControllerDoc {
             value = {
                     @ApiResponse(responseCode = "200", description = "Retorna dados do usuário criado"),
                     @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "404", description = "Nome de usuário já está sendo utilizado por outro usuário."),
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
@@ -59,6 +60,7 @@ public interface AuthControllerDoc {
             value = {
                     @ApiResponse(responseCode = "200", description = "Retorna os dados do usuário atualizado"),
                     @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "404", description = "Nome de usuário já está sendo utilizado por outro usuário."),
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
@@ -76,10 +78,9 @@ public interface AuthControllerDoc {
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
-    @PutMapping("update-password/{idUsuario}")
+    @PutMapping("/update-password")
     ResponseEntity<Void>
-    updatePassword(@PathVariable("idUsuario") Integer idUsuario,
-                   @Valid @RequestBody UsuarioSenhaInputDTO usuario) throws EntityNotFound;
+    updatePassword(@Valid @RequestBody UsuarioSenhaInputDTO usuario) throws EntityNotFound, RegraDeNegocioException;
 
     @Operation(summary = "Excluir usuário", description = "Exclui o usuário associado ao id fornecido.")
     @ApiResponses(

@@ -27,13 +27,16 @@ public class SecurityConfiguration {
         final String ADMIN = "ADMIN";
         final String PACIENTE = "PACIENTE";
         final String RECEPCAO = "RECEPCAO";
+        final String MEDICO = "MEDICO";
 
         http.headers().frameOptions().disable()
                 .and().cors()
                 .and().csrf().disable()
                 .authorizeHttpRequests((authz) -> authz
-                        .antMatchers("/auth", "/auth/login").permitAll()
+                        .antMatchers("/", "/auth", "/auth/login").permitAll()
                         .antMatchers("/auth/create-user").hasRole(ADMIN)
+                        .antMatchers("/auth/update-password").hasAnyRole(PACIENTE, MEDICO, ADMIN)
+                        .antMatchers(HttpMethod.GET, "/medico/**/atendimentos").hasAnyRole(MEDICO, RECEPCAO, ADMIN)
                         .antMatchers(HttpMethod.GET, "/atendimento/paciente/**").hasAnyRole(PACIENTE, RECEPCAO, ADMIN)
                         .antMatchers(HttpMethod.GET, "/medico/**").hasAnyRole(RECEPCAO, ADMIN)
                         .antMatchers(HttpMethod.GET, "/hospital/**").hasAnyRole(RECEPCAO, ADMIN)
@@ -51,8 +54,7 @@ public class SecurityConfiguration {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().antMatchers(
-                "/v3/api-docs",
+        return (web) -> web.ignoring().antMatchers("/v3/api-docs",
                 "/v3/api-docs/**",
                 "/swagger-resources/**",
                 "/swagger-ui/**"

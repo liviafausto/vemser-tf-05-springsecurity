@@ -65,11 +65,10 @@ public class AuthController implements AuthControllerDoc {
         return new ResponseEntity<>(usuarioService.update(idUsuario, usuario), HttpStatus.OK);
     }
 
-    @PutMapping("update-password/{idUsuario}")
-    public ResponseEntity<Void> updatePassword(@PathVariable("idUsuario") Integer idUsuario,
-                                               @Valid @RequestBody UsuarioSenhaInputDTO usuario)
-            throws EntityNotFound {
-        usuarioService.updatePassword(idUsuario, usuario);
+    @PutMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody UsuarioSenhaInputDTO usuario)
+            throws EntityNotFound, RegraDeNegocioException {
+        usuarioService.updatePassword(usuario);
         return ResponseEntity.ok().build();
     }
 

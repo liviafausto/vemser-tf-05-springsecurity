@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 
 @Service
@@ -89,8 +90,8 @@ public class UsuarioService {
         }
     }
 
-    public void updatePassword(Integer idUsuario, UsuarioSenhaInputDTO usuarioSenhaInput) throws EntityNotFound {
-        UsuarioEntity usuarioParaEditar = findById(idUsuario);
+    public void updatePassword(UsuarioSenhaInputDTO usuarioSenhaInput) throws EntityNotFound, RegraDeNegocioException {
+        UsuarioEntity usuarioParaEditar = findById(getIdLoggedUser());
         String senhaCriptografada = passwordEncoder.encode(usuarioSenhaInput.getSenha());
         usuarioParaEditar.setSenha(senhaCriptografada);
         usuarioRepository.save(usuarioParaEditar);
@@ -115,7 +116,6 @@ public class UsuarioService {
         return entity;
     }
 
-
     public UsuarioOutputDTO convertUsuarioToOutput(UsuarioEntity entity) {
         UsuarioOutputDTO usuarioOutputDTO = objectMapper.convertValue(entity, UsuarioOutputDTO.class);
         Set<Integer> cargos = new HashSet<>();
@@ -124,6 +124,23 @@ public class UsuarioService {
         }
         usuarioOutputDTO.setCargos(cargos);
         return usuarioOutputDTO;
+    }
+
+    public String generateRandomPassword(){
+        Random random = new Random();
+        Integer randomNumber = random.nextInt(1000, 9999);
+        return String.valueOf(randomNumber);
+    }
+
+    protected UsuarioInputDTO criarUsuarioInput(String login, Integer cargo){
+        UsuarioInputDTO usuarioInput = new UsuarioInputDTO();
+
+        usuarioInput.setLogin(login);
+        usuarioInput.setSenha(generateRandomPassword());
+        usuarioInput.setCargos(new HashSet<>());
+        usuarioInput.getCargos().add(cargo);
+
+        return usuarioInput;
     }
 
 }
