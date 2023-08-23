@@ -5,6 +5,7 @@ import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
+import br.com.dbc.wbhealth.model.dto.paciente.PacienteNovoOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
 import br.com.dbc.wbhealth.service.PacienteService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -54,9 +56,9 @@ public class PacienteController implements PacienteControllerDoc {
 
     @Override
     @PostMapping
-    public ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente)
-            throws BancoDeDadosException, EntityNotFound {
-        PacienteOutputDTO pacienteCriado = pacienteService.save(paciente);
+    public ResponseEntity<PacienteNovoOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente)
+            throws BancoDeDadosException, EntityNotFound, MessagingException {
+        PacienteNovoOutputDTO pacienteCriado = pacienteService.save(paciente);
         return new ResponseEntity<>(pacienteCriado, HttpStatus.OK);
     }
 

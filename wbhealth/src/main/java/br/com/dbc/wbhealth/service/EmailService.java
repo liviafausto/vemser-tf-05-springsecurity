@@ -1,7 +1,10 @@
 package br.com.dbc.wbhealth.service;
 
+import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
 import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
+import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.entity.PessoaEntity;
+import br.com.dbc.wbhealth.model.entity.UsuarioEntity;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -10,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
@@ -33,6 +37,45 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String emailSuporte;
 
+    public void enviarEmailUsuarioCriado(PessoaEntity pessoa, UsuarioInputDTO usuario, String cargo) throws MessagingException {
+        String assunto = "Cadastro realizado - WB Health";
+        String nomeTemplate = "email-template-usuario-criado.ftl";
+        String endpointUpdatePassword = "http://localhost:8080/swagger-ui/index.html#/auth-controller/updatePassword";
+
+        Map<String, String> dados = new HashMap<>();
+        dados.put("nome", pessoa.getNome());
+        dados.put("cargo", cargo);
+        dados.put("login", usuario.getLogin());
+        dados.put("senha", usuario.getSenha());
+        dados.put("emailSuporte", emailSuporte);
+        dados.put("linkParaAlterarSenha", endpointUpdatePassword);
+
+        enviarEmailTemplate(pessoa.getEmail(), assunto, nomeTemplate, dados);
+    }
+
+    private void enviarEmailTemplate(String toEmail, String subject, String templateName, Map<String, String> dados)
+            throws MessagingException {
+        MimeMessage emailTemplate = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(emailTemplate, true);
+
+        try{
+            helper.setFrom(from);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(obterConteudoDoTemplate(templateName, dados), true);
+
+            mailSender.send(helper.getMimeMessage());
+        }
+        catch (IOException | TemplateException e){
+            e.printStackTrace();
+        }
+    }
+
+    private String obterConteudoDoTemplate(String templateName, Map<String, String> dados) throws IOException, TemplateException {
+        Template template = fmConfiguration.getTemplate(templateName);
+        return FreeMarkerTemplateUtils.processTemplateIntoString(template, dados);
+    }
+
     public void sendEmailAtendimento(AtendimentoEntity atendimento, TipoEmail tipoEmail) throws MessagingException {
         sendTemplateEmail(atendimento, tipoEmail);
     }
@@ -42,10 +85,11 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(emailTemplate, true);
         PessoaEntity paciente = atendimento.getPacienteEntity().getPessoa();
 
-        this.enviatParaPaciente(helper, paciente, tipoEmail, atendimento);
+        this.enviarParaPaciente(helper, paciente, tipoEmail, atendimento);
     }
 
-    private void enviatParaPaciente(MimeMessageHelper helper, PessoaEntity pessoa, TipoEmail tipoEmail, AtendimentoEntity atendimento) {
+    private void enviarParaPaciente(MimeMessageHelper helper, PessoaEntity pessoa, TipoEmail tipoEmail,
+                                    AtendimentoEntity atendimento) {
         try {
             helper.setFrom(from);
             helper.setTo(pessoa.getEmail());

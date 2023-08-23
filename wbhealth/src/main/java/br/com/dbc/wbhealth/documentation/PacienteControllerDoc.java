@@ -4,6 +4,7 @@ import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
+import br.com.dbc.wbhealth.model.dto.paciente.PacienteNovoOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -87,8 +89,9 @@ public interface PacienteControllerDoc {
             }
     )
     @PostMapping
-    ResponseEntity<PacienteOutputDTO>
-    save(@RequestBody @Valid PacienteInputDTO paciente) throws BancoDeDadosException, EntityNotFound;
+    ResponseEntity<PacienteNovoOutputDTO>
+    save(@RequestBody @Valid PacienteInputDTO paciente) throws BancoDeDadosException, EntityNotFound,
+            MessagingException;
 
 
     @Operation(
