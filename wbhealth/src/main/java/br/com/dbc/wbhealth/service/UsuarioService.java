@@ -55,10 +55,6 @@ public class UsuarioService {
         return convertUsuarioToOutput(usuario);
     }
 
-    public boolean existsByLogin(String login){
-        return usuarioRepository.existsByLogin(login);
-    }
-
     public UsuarioOutputDTO create(UsuarioInputDTO usuarioInput) throws EntityNotFound, RegraDeNegocioException {
         if (usuarioRepository.existsByLogin(usuarioInput.getLogin())) {
             throw new RegraDeNegocioException("Nome de usuário já está em uso.");
@@ -94,8 +90,8 @@ public class UsuarioService {
         }
     }
 
-    public void updatePassword(Integer idUsuario, UsuarioSenhaInputDTO usuarioSenhaInput) throws EntityNotFound {
-        UsuarioEntity usuarioParaEditar = findById(idUsuario);
+    public void updatePassword(UsuarioSenhaInputDTO usuarioSenhaInput) throws EntityNotFound, RegraDeNegocioException {
+        UsuarioEntity usuarioParaEditar = findById(getIdLoggedUser());
         String senhaCriptografada = passwordEncoder.encode(usuarioSenhaInput.getSenha());
         usuarioParaEditar.setSenha(senhaCriptografada);
         usuarioRepository.save(usuarioParaEditar);
