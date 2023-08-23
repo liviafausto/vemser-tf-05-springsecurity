@@ -48,6 +48,9 @@ public class AtendimentoEntity {
     @Enumerated(EnumType.STRING) // Tornar cardinal depois
     private TipoDeAtendimento tipoDeAtendimento;
 
+    @Column(name = "receita")
+    private String receita;
+
     @Column(name = "valor_atendimento")
     private Double valorDoAtendimento;
 

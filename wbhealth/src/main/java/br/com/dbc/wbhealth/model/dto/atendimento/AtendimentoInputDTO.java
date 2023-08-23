@@ -48,6 +48,11 @@ public class AtendimentoInputDTO {
     @Schema(description = "Tipo do atendimento", example = "CONSULTA", required = true)
     private String tipoDeAtendimento;
 
+    @NotNull
+    @NotBlank
+    @Schema(description = "Receita médica", example = "Dipirona", required = true)
+    private String receita;
+
     @Positive
     @Nullable
     @Schema(description = "Valor do atendimento", example = "200", required = true)

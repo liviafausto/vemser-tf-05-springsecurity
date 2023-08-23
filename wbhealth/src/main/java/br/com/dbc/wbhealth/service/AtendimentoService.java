@@ -64,7 +64,7 @@ public class AtendimentoService {
         return convertToOutputDTO(atendimentoEntity);
     }
 
-    public List<AtendimentoOutputDTO> bucarAtendimentoPeloIdUsuario(Integer idPaciente) throws EntityNotFound {
+    public List<AtendimentoOutputDTO> bucarAtendimentoPeloIdPaciente(Integer idPaciente) throws EntityNotFound {
         pacienteService.findById(idPaciente);
         return findAll()
                 .stream()
@@ -103,6 +103,7 @@ public class AtendimentoService {
         atendimento.setLaudo(atendimentoDTO.getLaudo());
         atendimento.setValorDoAtendimento(atendimentoDTO.getValorDoAtendimento());
         atendimento.setTipoDeAtendimento(TipoDeAtendimento.valueOf(atendimentoDTO.getTipoDeAtendimento()));
+        atendimento.setReceita(atendimentoDTO.getReceita());
         atendimento.setDataAtendimento(atendimentoDTO.getDataAtendimento());
 
         return atendimento;
@@ -135,6 +136,14 @@ public class AtendimentoService {
 
         Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
         return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(dataInicio, dataFim, paginacao).map(this::convertToOutputDTO);
+    }
+
+    public Page<AtendimentoOutputDTO> findByMedicoEntityOrderByDataAtendimentoDesc(Integer idMedico,
+                                                                                   Integer pagina,
+                                                                                   Integer quantidadeRegistros) throws EntityNotFound {
+        Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
+        MedicoEntity medicoEntity = medicoService.getMedicoById(idMedico);
+        return atendimentoRepository.findByMedicoEntityOrderByDataAtendimentoDesc(medicoEntity, paginacao).map(this::convertToOutputDTO);
     }
 
     private AtendimentoOutputDTO convertToOutputDTO(AtendimentoEntity entity) {
