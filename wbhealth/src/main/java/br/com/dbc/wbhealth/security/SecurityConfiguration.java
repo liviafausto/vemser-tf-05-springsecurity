@@ -38,6 +38,7 @@ public class SecurityConfiguration {
                         .antMatchers("/auth/update-password").hasAnyRole(PACIENTE, MEDICO, ADMIN)
                         .antMatchers(HttpMethod.GET, "/medico/**/atendimentos").hasAnyRole(MEDICO, RECEPCAO, ADMIN)
                         .antMatchers(HttpMethod.GET, "/atendimento/paciente/**").hasAnyRole(PACIENTE, RECEPCAO, ADMIN)
+                        .antMatchers(HttpMethod.GET, "/atendimento/medico/**").hasAnyRole(MEDICO, RECEPCAO, ADMIN)
                         .antMatchers(HttpMethod.GET, "/medico/**").hasAnyRole(RECEPCAO, ADMIN)
                         .antMatchers(HttpMethod.GET, "/hospital/**").hasAnyRole(RECEPCAO, ADMIN)
                         .antMatchers("/atendimento/**", "/paciente/**").hasAnyRole(RECEPCAO, ADMIN)

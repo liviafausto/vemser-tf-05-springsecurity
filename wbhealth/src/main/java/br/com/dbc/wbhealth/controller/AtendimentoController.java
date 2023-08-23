@@ -1,7 +1,6 @@
 package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.AtendimentoControllerDoc;
-import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -39,8 +37,16 @@ public class AtendimentoController implements AtendimentoControllerDoc {
     }
 
     @GetMapping("/paciente/{idPaciente}")
-    public ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdUsuario(@Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente) throws EntityNotFound {
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.bucarAtendimentoPeloIdUsuario(idPaciente));
+    public ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdPaciente(@Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente) throws EntityNotFound {
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.bucarAtendimentoPeloIdPaciente(idPaciente));
+    }
+
+    @GetMapping("/medico/{idMedico}")
+    public ResponseEntity<Page<AtendimentoOutputDTO>> findByMedicoEntityOrderByDataAtendimentoDesc(@Positive(message = "Deve ser positivo") @PathVariable Integer idMedico,
+                                                                                                   @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+                                                                                                   @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros) throws EntityNotFound {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(atendimentoService.findByMedicoEntityOrderByDataAtendimentoDesc(idMedico, pagina, quantidadeRegistros));
     }
 
     @GetMapping("/paginado")
