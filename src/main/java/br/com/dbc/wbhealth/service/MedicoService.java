@@ -3,14 +3,9 @@ package br.com.dbc.wbhealth.service;
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.*;
-import br.com.dbc.wbhealth.model.dto.paciente.PacienteNovoOutputDTO;
-import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioInputDTO;
 import br.com.dbc.wbhealth.model.dto.usuario.UsuarioOutputDTO;
-import br.com.dbc.wbhealth.model.entity.HospitalEntity;
-import br.com.dbc.wbhealth.model.entity.MedicoEntity;
-import br.com.dbc.wbhealth.model.entity.PacienteEntity;
-import br.com.dbc.wbhealth.model.entity.PessoaEntity;
+import br.com.dbc.wbhealth.model.entity.*;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import br.com.dbc.wbhealth.repository.MedicoRepository;
 import br.com.dbc.wbhealth.repository.PessoaRepository;
@@ -26,6 +21,7 @@ import javax.mail.MessagingException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -94,6 +90,12 @@ public class MedicoService {
 
     public void delete(Integer idMedico) throws EntityNotFound {
         MedicoEntity medico = getMedicoById(idMedico);
+        Optional<UsuarioEntity> usuario = usuarioService.findByLogin(medico.getPessoa().getCpf());
+
+        if(usuario.isPresent()){
+            usuarioService.remove(usuario.get().getIdUsuario());
+        }
+
         medicoRepository.delete(medico);
     }
 

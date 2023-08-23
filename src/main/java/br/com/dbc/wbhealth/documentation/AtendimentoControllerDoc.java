@@ -48,7 +48,7 @@ public interface AtendimentoControllerDoc {
             @Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento
     ) throws BancoDeDadosException, EntityNotFound;
 
-    @Operation(summary = "Buscar atendimentos de um usuário.", description = "Busca um atendimento pelo ID de um paciente.")
+    @Operation(summary = "Buscar atendimentos de um paciente.", description = "Busca um atendimento pelo ID de um paciente.")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "Retorna os atendimentos relacionados ao paciente."),
@@ -60,9 +60,25 @@ public interface AtendimentoControllerDoc {
     )
     @GetMapping("/paciente/{idPaciente}")
     ResponseEntity<List<AtendimentoOutputDTO>>
-    bucarAtendimentoPeloIdUsuario(
+    bucarAtendimentoPeloIdPaciente(
             @Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente
     ) throws BancoDeDadosException, EntityNotFound;
+
+    @Operation(summary = "Buscar atendimentos paginados de um médico ordenados por data.", description = "Busca os atendimentos pelo ID de um médico ordenados por data (do mais recente ao mais antigo).")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Retorna os atendimentos relacionados ao médico ordenados por data (do mais recente ao mais antigo)."),
+                    @ApiResponse(responseCode = "400", description = "Não foi possível buscar os atendimentos."),
+                    @ApiResponse(responseCode = "404", description = "Nenhum atendimento foi encontrado."),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
+            }
+    )
+    @GetMapping("/medico/{idMedico}")
+    ResponseEntity<Page<AtendimentoOutputDTO>>
+    findByMedicoEntityOrderByDataAtendimentoDesc(@Positive(message = "Deve ser positivo") @PathVariable Integer idMedico,
+                                                 @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+                                                 @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros) throws EntityNotFound;
 
     @Operation(summary = "Buscar atendimentos paginados.", description = "Busca todos os atendimentos registrados, porém, paginado.")
     @ApiResponses(
@@ -103,7 +119,7 @@ public interface AtendimentoControllerDoc {
     @Operation(summary = "Adicionar atendimento.", description = "Adiciona um atendimento ao banco de dados.")
     @ApiResponses(
             value = {
-                    @ApiResponse(responseCode = "200", description = "Retorna o atendimento salvo."),
+                    @ApiResponse(responseCode = "201", description = "Retorna o atendimento salvo."),
                     @ApiResponse(responseCode = "400", description = "Não foi possível registar o atendimento no banco."),
                     @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
