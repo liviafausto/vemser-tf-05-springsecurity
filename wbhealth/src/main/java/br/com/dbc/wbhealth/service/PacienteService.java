@@ -21,10 +21,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +69,7 @@ public class PacienteService {
         PacienteEntity paciente = convertInputToPaciente(pessoaCriada, pacienteInput);
         PacienteEntity pacienteCriado = pacienteRepository.save(paciente);
 
-//        emailService.enviarEmailUsuarioCriado(pacienteCriado.getPessoa(), usuarioInput, "PACIENTE");
+        emailService.enviarEmailUsuarioCriado(pacienteCriado.getPessoa(), usuarioInput, "PACIENTE");
         return convertToPacienteNovoOutput(pacienteCriado, usuarioOutput);
     }
 
@@ -107,17 +105,6 @@ public class PacienteService {
     protected PacienteEntity getPacienteById(Integer idPaciente) throws EntityNotFound {
         return pacienteRepository.findById(idPaciente)
                 .orElseThrow(() -> new EntityNotFound("Paciente não encontrado"));
-    }
-
-    private UsuarioInputDTO criarUsuarioInputParaPaciente(String loginPaciente){
-        UsuarioInputDTO usuarioInput = new UsuarioInputDTO();
-
-        usuarioInput.setLogin(loginPaciente);
-        usuarioInput.setSenha(usuarioService.generateRandomPassword());
-        usuarioInput.setCargos(new HashSet<>());
-        usuarioInput.getCargos().add(3);
-
-        return usuarioInput;
     }
 
     private PessoaEntity convertInputToPessoa(PacienteInputDTO pacienteInput){
