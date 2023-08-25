@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class AtendimentoInputDTO {
 
     @Positive
@@ -38,9 +37,7 @@ public class AtendimentoInputDTO {
     @Schema(description = "Data de atendimento", example = "30/12/2099", required = true)
     private LocalDate dataAtendimento;
 
-    @NotBlank
-    @NotNull
-    @Schema(description = "Laudo do atendimento", example = "Dor de cabeça", required = true)
+    @Schema(description = "Laudo do atendimento", example = "Dor de cabeça")
     private String laudo;
 
     @NotNull
@@ -48,9 +45,7 @@ public class AtendimentoInputDTO {
     @Schema(description = "Tipo do atendimento", example = "CONSULTA", required = true)
     private String tipoDeAtendimento;
 
-    @NotNull
-    @NotBlank
-    @Schema(description = "Receita médica", example = "Dipirona", required = true)
+    @Schema(description = "Receita médica", example = "Dipirona")
     private String receita;
 
     @Positive
