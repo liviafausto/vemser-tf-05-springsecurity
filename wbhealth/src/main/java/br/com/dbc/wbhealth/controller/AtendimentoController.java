@@ -27,61 +27,74 @@ public class AtendimentoController implements AtendimentoControllerDoc {
     private final AtendimentoService atendimentoService;
 
     @GetMapping
-    public ResponseEntity<List<AtendimentoOutputDTO>> findAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAll());
-    }
-
-    @GetMapping("/{idAtendimento}")
-    public ResponseEntity<AtendimentoOutputDTO> buscarAtendimentoPeloId(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento) throws EntityNotFound {
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findById(idAtendimento));
-    }
-
-    @GetMapping("/paciente/{idPaciente}")
-    public ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdPaciente(@Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente) throws EntityNotFound {
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.bucarAtendimentoPeloIdPaciente(idPaciente));
-    }
-
-    @GetMapping("/medico/{idMedico}")
-    public ResponseEntity<Page<AtendimentoOutputDTO>> findByMedicoEntityOrderByDataAtendimentoDesc(@Positive(message = "Deve ser positivo") @PathVariable Integer idMedico,
-                                                                                                   @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
-                                                                                                   @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros) throws EntityNotFound {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(atendimentoService.findByMedicoEntityOrderByDataAtendimentoDesc(idMedico, pagina, quantidadeRegistros));
-    }
-
-    @GetMapping("/paginado")
     public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginada(
             @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
             @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
     ) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(atendimentoService.findAllPaginada(pagina, quantidadeRegistros));
+        Page<AtendimentoOutputDTO> atendimentos = atendimentoService.findAllPaginada(pagina, quantidadeRegistros);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentos);
     }
 
-    @GetMapping("/paginado/data")
+    @GetMapping("/data")
     public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(
             @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
             @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros,
             @RequestParam String dataInicio,
             @RequestParam String dataFinal
     ) throws DataInvalidaException {
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService
-                .findAllPaginadaByData(dataInicio, dataFinal, pagina, quantidadeRegistros));
+        Page<AtendimentoOutputDTO> atendimentosEntreDatas =
+                atendimentoService.findAllPaginadaByData(dataInicio, dataFinal, pagina, quantidadeRegistros);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentosEntreDatas);
+    }
+
+    @GetMapping("/{idAtendimento}")
+    public ResponseEntity<AtendimentoOutputDTO> buscarAtendimentoPeloId(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento
+    ) throws EntityNotFound {
+        AtendimentoOutputDTO atendimentoEncontrado = atendimentoService.findById(idAtendimento);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoEncontrado);
+    }
+
+    @GetMapping("/paciente/{idPaciente}")
+    public ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdPaciente(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente
+    ) throws EntityNotFound {
+        List<AtendimentoOutputDTO> atendimentosPaciente = atendimentoService.bucarAtendimentoPeloIdPaciente(idPaciente);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentosPaciente);
+    }
+
+    @GetMapping("/medico/{idMedico}")
+    public ResponseEntity<Page<AtendimentoOutputDTO>> findByMedicoEntityOrderByDataAtendimentoDesc(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idMedico,
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    ) throws EntityNotFound {
+        Page<AtendimentoOutputDTO> atendimentosMedico =
+                atendimentoService.findByMedicoEntityOrderByDataAtendimentoDesc(idMedico, pagina, quantidadeRegistros);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentosMedico);
     }
 
     @PostMapping
-    public ResponseEntity<AtendimentoOutputDTO> save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws EntityNotFound {
-        return ResponseEntity.status(HttpStatus.CREATED).body(atendimentoService.save(novoAtendimento));
+    public ResponseEntity<AtendimentoOutputDTO> save(
+            @Valid @RequestBody AtendimentoInputDTO novoAtendimento
+    ) throws EntityNotFound {
+        AtendimentoOutputDTO atendimentoCriado = atendimentoService.save(novoAtendimento);
+        return ResponseEntity.status(HttpStatus.CREATED).body(atendimentoCriado);
     }
 
     @PutMapping("/{idAtendimento}")
-    public ResponseEntity<AtendimentoOutputDTO> alterarPeloId(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento,
-                                                              @Valid @RequestBody AtendimentoInputDTO atendimento) throws EntityNotFound {
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.update(idAtendimento, atendimento));
+    public ResponseEntity<AtendimentoOutputDTO> alterarPeloId(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento,
+            @Valid @RequestBody AtendimentoInputDTO atendimento
+    ) throws EntityNotFound {
+        AtendimentoOutputDTO atendimentoAtualizado = atendimentoService.update(idAtendimento, atendimento);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoAtualizado);
     }
 
     @DeleteMapping("/{idAtendimento}")
-    public ResponseEntity<Void> deletarAtendimento(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento) throws EntityNotFound {
+    public ResponseEntity<Void> deletarAtendimento(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento
+    ) throws EntityNotFound {
         atendimentoService.deletarPeloId(idAtendimento);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
