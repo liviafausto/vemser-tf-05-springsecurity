@@ -10,9 +10,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 public interface RelatorioControllerDoc {
 
-    @Operation(summary = "Gerar relatório de lúcro até agora.", description = "Gera um relatório de lucro de cada tipo.")
+    @Operation(
+            summary = "Gerar relatório de lucro",
+            description = "Gera um relatório de lucro de cada tipo"
+    )
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "Retorna o relatório gerado."),
@@ -22,9 +28,15 @@ public interface RelatorioControllerDoc {
             }
     )
     @GetMapping("/lucro")
-    ResponseEntity<Page<RelatorioLucro>> relatorioLucroAteOMomento(@RequestParam Integer pagina, @RequestParam Integer quantidade);
+    ResponseEntity<Page<RelatorioLucro>> relatorioLucroAteOMomento(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    );
 
-    @Operation(summary = "Gerar relatório de lúcro entre um intervalo de datas.", description = "Gera um relatório de lucro de cada tipo entre as datas.")
+    @Operation(
+            summary = "Gerar relatório de lucro entre datas",
+            description = "Gera um relatório de lucro de cada tipo entre as datas"
+    )
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "Retorna o relatório gerado."),
@@ -34,7 +46,10 @@ public interface RelatorioControllerDoc {
             }
     )
     @GetMapping("/lucro/data")
-    ResponseEntity<Page<RelatorioLucro>> relatorioLucroPorData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
-                                                                      @RequestParam String dataInicio) throws DataInvalidaException;
+    ResponseEntity<Page<RelatorioLucro>> relatorioLucroPorData(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros,
+            @RequestParam String dataInicio
+    ) throws DataInvalidaException;
 
 }
