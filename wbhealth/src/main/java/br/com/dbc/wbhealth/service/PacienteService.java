@@ -2,6 +2,7 @@ package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoMedicoDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoPacienteDTO;
@@ -54,6 +55,13 @@ public class PacienteService {
     public PacienteOutputDTO findById(Integer idPaciente) throws EntityNotFound {
         PacienteEntity pacienteEncontrado = getPacienteById(idPaciente);
         return convertPacienteToOutput(pacienteEncontrado);
+    }
+
+    public PacienteEntity findByCpf(String cpf) throws EntityNotFound {
+        PessoaEntity pessoa = pessoaRepository.findByCpf(cpf)
+                .orElseThrow(() -> new EntityNotFound("Paciente com esse CPF não encontrado"));
+
+        return pacienteRepository.findByPessoa(pessoa);
     }
 
     public PacienteNovoOutputDTO save(PacienteInputDTO pacienteInput) throws BancoDeDadosException, EntityNotFound, MessagingException {

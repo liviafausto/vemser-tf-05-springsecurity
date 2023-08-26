@@ -8,12 +8,15 @@ import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -78,8 +81,10 @@ public interface AtendimentoControllerDoc {
     ) throws BancoDeDadosException, EntityNotFound;
 
     @Operation(
-            summary = "Buscar atendimentos de um paciente",
-            description = "Busca os atendimento de um paciente associado ao id fornecido"
+            summary = "Buscar atendimentos do paciente por CPF",
+            description = "Busca os atendimento do paciente associado ao CPF fornecido, de forma paginada\n"
+                    + "Os atendimentos são listados em ordem decrescente de data "
+                    + "- ou seja, da mais recente para a mais antiga"
     )
     @ApiResponses(
             value = {
@@ -90,15 +95,18 @@ public interface AtendimentoControllerDoc {
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
-    @GetMapping("/paciente/{idPaciente}")
-    ResponseEntity<List<AtendimentoOutputDTO>>
-    bucarAtendimentoPeloIdPaciente(
-            @Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente
+    @GetMapping("/paciente/{cpfPaciente}")
+    ResponseEntity<Page<AtendimentoOutputDTO>> bucarAtendimentoPeloCpfPaciente(
+            @CPF @PathVariable String cpfPaciente,
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
     ) throws BancoDeDadosException, EntityNotFound;
 
     @Operation(
-            summary = "Buscar atendimentos de um médico",
-            description = "Busca os atendimentos de um médico de forma paginada, ordenados por datas decrescentes"
+            summary = "Buscar atendimentos do médico por CPF",
+            description = "Busca os atendimentos do médico associado ao CPF fornecido, de forma paginada\n"
+                    + "Os atendimentos são listados em ordem decrescente de data "
+                    + "- ou seja, da mais recente para a mais antiga"
     )
     @ApiResponses(
             value = {
@@ -109,10 +117,9 @@ public interface AtendimentoControllerDoc {
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
-    @GetMapping("/medico/{idMedico}")
-    ResponseEntity<Page<AtendimentoOutputDTO>>
-    findByMedicoEntityOrderByDataAtendimentoDesc(
-            @Positive(message = "Deve ser positivo") @PathVariable Integer idMedico,
+    @GetMapping("/medico/{cpfMedico}")
+    ResponseEntity<Page<AtendimentoOutputDTO>> bucarAtendimentoPeloCpfMedico(
+            @CPF @PathVariable String cpfMedico,
             @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
             @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
     ) throws EntityNotFound;
@@ -130,8 +137,9 @@ public interface AtendimentoControllerDoc {
             }
     )
     @PostMapping
-    ResponseEntity<AtendimentoOutputDTO>
-    save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws BancoDeDadosException, EntityNotFound, MessagingException;
+    ResponseEntity<AtendimentoOutputDTO> save(
+            @Valid @RequestBody AtendimentoInputDTO novoAtendimento
+    ) throws BancoDeDadosException, EntityNotFound, MessagingException;
 
     @Operation(
             summary = "Atualizar atendimento",
@@ -147,8 +155,7 @@ public interface AtendimentoControllerDoc {
             }
     )
     @PutMapping("/{idAtendimento}")
-    ResponseEntity<AtendimentoOutputDTO>
-    alterarPeloId(
+    ResponseEntity<AtendimentoOutputDTO> alterarPeloId(
             @Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento,
             @Valid @RequestBody AtendimentoInputDTO atendimento
     ) throws BancoDeDadosException, EntityNotFound, MessagingException;

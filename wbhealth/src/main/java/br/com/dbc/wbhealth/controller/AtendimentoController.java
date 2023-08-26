@@ -7,6 +7,7 @@ import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import br.com.dbc.wbhealth.service.AtendimentoService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.br.CPF;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -55,22 +58,25 @@ public class AtendimentoController implements AtendimentoControllerDoc {
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoEncontrado);
     }
 
-    @GetMapping("/paciente/{idPaciente}")
-    public ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdPaciente(
-            @Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente
-    ) throws EntityNotFound {
-        List<AtendimentoOutputDTO> atendimentosPaciente = atendimentoService.bucarAtendimentoPeloIdPaciente(idPaciente);
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentosPaciente);
-    }
-
-    @GetMapping("/medico/{idMedico}")
-    public ResponseEntity<Page<AtendimentoOutputDTO>> findByMedicoEntityOrderByDataAtendimentoDesc(
-            @Positive(message = "Deve ser positivo") @PathVariable Integer idMedico,
+    @GetMapping("/paciente/{cpfPaciente}")
+    public ResponseEntity<Page<AtendimentoOutputDTO>> bucarAtendimentoPeloCpfPaciente(
+            @CPF @PathVariable String cpfPaciente,
             @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
             @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
     ) throws EntityNotFound {
-        Page<AtendimentoOutputDTO> atendimentosMedico =
-                atendimentoService.findByMedicoEntityOrderByDataAtendimentoDesc(idMedico, pagina, quantidadeRegistros);
+        Page<AtendimentoOutputDTO> atendimentosPaciente = atendimentoService
+                .bucarAtendimentoPeloCpfPaciente(cpfPaciente, pagina, quantidadeRegistros);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentosPaciente);
+    }
+
+    @GetMapping("/medico/{cpfMedico}")
+    public ResponseEntity<Page<AtendimentoOutputDTO>> bucarAtendimentoPeloCpfMedico(
+            @CPF @PathVariable String cpfMedico,
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    ) throws EntityNotFound{
+        Page<AtendimentoOutputDTO> atendimentosMedico = atendimentoService
+                .buscarAtendimentoPeloCpfMedico(cpfMedico, pagina, quantidadeRegistros);
         return ResponseEntity.status(HttpStatus.OK).body(atendimentosMedico);
     }
 

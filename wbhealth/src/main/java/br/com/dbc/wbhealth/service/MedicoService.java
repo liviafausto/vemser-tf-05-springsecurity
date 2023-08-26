@@ -45,6 +45,13 @@ public class MedicoService {
         return convertMedicoToOutput(medicoEncontrado);
     }
 
+    public MedicoEntity findByCpf(String cpf) throws EntityNotFound {
+        PessoaEntity pessoa = pessoaRepository.findByCpf(cpf)
+                .orElseThrow(() -> new EntityNotFound("Médico com esse CPF não encontrado"));
+
+        return medicoRepository.findByPessoa(pessoa);
+    }
+
     public MedicoNovoOutputDTO save(MedicoInputDTO medicoInputDTO) throws BancoDeDadosException, EntityNotFound, MessagingException {
 
         PessoaEntity pessoaEntity = convertInputToPessoa(medicoInputDTO);

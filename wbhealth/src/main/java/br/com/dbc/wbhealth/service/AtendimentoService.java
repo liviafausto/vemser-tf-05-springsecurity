@@ -3,10 +3,7 @@ package br.com.dbc.wbhealth.service;
 import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.*;
-import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
-import br.com.dbc.wbhealth.model.entity.HospitalEntity;
-import br.com.dbc.wbhealth.model.entity.MedicoEntity;
-import br.com.dbc.wbhealth.model.entity.PacienteEntity;
+import br.com.dbc.wbhealth.model.entity.*;
 import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,10 +31,6 @@ public class AtendimentoService {
     private final MedicoService medicoService;
 
     private final HospitalService hospitalService;
-
-    public List<AtendimentoOutputDTO> findAll() {
-        return convertToDTOList(atendimentoRepository.findAll());
-    }
 
     public Page<AtendimentoOutputDTO> findAllPaginada(Integer pagina, Integer quantidadeRegistros) {
         Sort ordenacao = Sort.by("idAtendimento");
@@ -69,21 +62,36 @@ public class AtendimentoService {
         return convertToOutputDTO(atendimentoEntity);
     }
 
-    public List<AtendimentoOutputDTO> bucarAtendimentoPeloIdPaciente(Integer idPaciente) throws EntityNotFound {
-        pacienteService.findById(idPaciente);
-        return findAll().stream().filter(
-                atendimento -> atendimento.getPaciente().getIdPaciente().equals(idPaciente)
-        ).toList();
+    public Page<AtendimentoOutputDTO> bucarAtendimentoPeloCpfPaciente(
+            String cpfPaciente, Integer pagina, Integer quantidadeRegistros
+    ) throws EntityNotFound {
+        PacienteEntity pacienteSolicitado = pacienteService.findByCpf(cpfPaciente);
+
+        Sort ordenacao = Sort.by(Sort.Direction.DESC, "dataAtendimento");
+        Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
+        Page<AtendimentoEntity> atendimentosDoPaciente =
+                atendimentoRepository.findByPacienteEntity(pacienteSolicitado, pageable);
+
+        if(atendimentosDoPaciente.isEmpty())
+            throw new EntityNotFound("Nenhum atendimento foi encontrado para esse paciente");
+
+        return atendimentosDoPaciente.map(this::convertToOutputDTO);
     }
 
-    public Page<AtendimentoOutputDTO> findByMedicoEntityOrderByDataAtendimentoDesc(
-            Integer idMedico, Integer pagina, Integer quantidadeRegistros
+    public Page<AtendimentoOutputDTO> buscarAtendimentoPeloCpfMedico (
+            String cpfMedico, Integer pagina, Integer quantidadeRegistros
     ) throws EntityNotFound {
-        Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
-        MedicoEntity medicoEntity = medicoService.getMedicoById(idMedico);
-        return atendimentoRepository
-                .findByMedicoEntityOrderByDataAtendimentoDesc(medicoEntity, paginacao)
-                .map(this::convertToOutputDTO);
+        MedicoEntity medicoSolicitado = medicoService.findByCpf(cpfMedico);
+
+        Sort ordenacao = Sort.by(Sort.Direction.DESC, "dataAtendimento");
+        Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
+        Page<AtendimentoEntity> atendimentosDoMedico =
+                atendimentoRepository.findByMedicoEntity(medicoSolicitado, paginacao);
+
+        if(atendimentosDoMedico.isEmpty())
+            throw new EntityNotFound("Nenhum atendimento foi encontrado para esse médico");
+
+        return atendimentosDoMedico.map(this::convertToOutputDTO);
     }
 
     public AtendimentoOutputDTO save(AtendimentoInputDTO atendimentoNovo) throws EntityNotFound {
