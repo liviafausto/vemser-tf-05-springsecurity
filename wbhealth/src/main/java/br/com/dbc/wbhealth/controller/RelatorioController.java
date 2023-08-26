@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 
 @RequiredArgsConstructor
@@ -26,15 +28,21 @@ public class RelatorioController implements RelatorioControllerDoc {
     private final AtendimentoServiceRelatorio atendimentoService;
 
     @GetMapping("/lucro")
-    public ResponseEntity<Page<RelatorioLucro>> relatorioLucroAteOMomento(@RequestParam Integer pagina, @RequestParam Integer quantidade) {
-        Pageable paginacao = PageRequest.of(pagina, quantidade);
+    public ResponseEntity<Page<RelatorioLucro>> relatorioLucroAteOMomento(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    ) {
+        Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findLucroAteAgora(paginacao));
     }
 
     @GetMapping("/lucro/data")
-    public ResponseEntity<Page<RelatorioLucro>> relatorioLucroPorData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
-                                                                      @RequestParam String dataInicio) throws DataInvalidaException {
-        Pageable paginacao = PageRequest.of(pagina, quantidade);
+    public ResponseEntity<Page<RelatorioLucro>> relatorioLucroPorData(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros,
+            @RequestParam String dataInicio
+    ) throws DataInvalidaException {
+        Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.getLucroByData(dataInicio, paginacao));
     }
 

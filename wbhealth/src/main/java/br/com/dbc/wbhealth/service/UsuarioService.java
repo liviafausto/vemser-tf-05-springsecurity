@@ -68,26 +68,25 @@ public class UsuarioService {
         return convertUsuarioToOutput(usuarioRepository.save(usuarioEntity));
     }
 
-    public UsuarioOutputDTO update(Integer idUsuario, UsuarioInputDTO usuarioInput) throws EntityNotFound {
-        try {
-            UsuarioEntity usuarioDesatualizado = findById(idUsuario);
-            if (usuarioRepository.existsByLogin(usuarioInput.getLogin())) {
-                if (usuarioRepository.existsByLogin(usuarioInput.getLogin())) {
-                    throw new RegraDeNegocioException("Nome de usuário é utilizado por outro usuário.");
-                }
-            }
-            UsuarioEntity entity = convertInputToUsuario(usuarioInput);
-            String senhaCriptografada = passwordEncoder.encode(usuarioInput.getSenha());
-            entity.setSenha(senhaCriptografada);
+    public UsuarioOutputDTO update(Integer idUsuario, UsuarioInputDTO usuarioInput) throws EntityNotFound, RegraDeNegocioException {
+        UsuarioEntity usuarioDesatualizado = findById(idUsuario);
 
-            BeanUtils.copyProperties(entity, usuarioDesatualizado, "idUsuario");
+        boolean loginSeraAlterado = !(usuarioInput.getLogin().equals(usuarioDesatualizado.getLogin()));
+        boolean novoLoginJaExiste = usuarioRepository.existsByLogin(usuarioInput.getLogin());
 
-            UsuarioEntity usuarioAtualizado = usuarioRepository.save(usuarioDesatualizado);
-
-            return convertUsuarioToOutput(usuarioAtualizado);
-        } catch (RegraDeNegocioException e) {
-            throw new RuntimeException(e);
+        if (loginSeraAlterado && novoLoginJaExiste) {
+            throw new RegraDeNegocioException("Nome de usuário é utilizado por outro usuário.");
         }
+
+        UsuarioEntity entity = convertInputToUsuario(usuarioInput);
+        String senhaCriptografada = passwordEncoder.encode(usuarioInput.getSenha());
+        entity.setSenha(senhaCriptografada);
+
+        BeanUtils.copyProperties(entity, usuarioDesatualizado, "idUsuario");
+
+        UsuarioEntity usuarioAtualizado = usuarioRepository.save(usuarioDesatualizado);
+
+        return convertUsuarioToOutput(usuarioAtualizado);
     }
 
     public void updatePassword(UsuarioSenhaInputDTO usuarioSenhaInput) throws EntityNotFound, RegraDeNegocioException {

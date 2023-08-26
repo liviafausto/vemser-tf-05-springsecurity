@@ -2,7 +2,10 @@ package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.exceptions.RegraDeNegocioException;
+import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoMedicoDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
+import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoPacienteDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteNovoOutputDTO;
@@ -52,6 +55,13 @@ public class PacienteService {
     public PacienteOutputDTO findById(Integer idPaciente) throws EntityNotFound {
         PacienteEntity pacienteEncontrado = getPacienteById(idPaciente);
         return convertPacienteToOutput(pacienteEncontrado);
+    }
+
+    public PacienteEntity findByCpf(String cpf) throws EntityNotFound {
+        PessoaEntity pessoa = pessoaRepository.findByCpf(cpf)
+                .orElseThrow(() -> new EntityNotFound("Paciente com esse CPF não encontrado"));
+
+        return pacienteRepository.findByPessoa(pessoa);
     }
 
     public PacienteNovoOutputDTO save(PacienteInputDTO pacienteInput) throws BancoDeDadosException, EntityNotFound, MessagingException {
@@ -172,15 +182,19 @@ public class PacienteService {
     }
 
     private AtendimentoOutputDTO convertAtendimentoToOutput(AtendimentoEntity atendimento) {
-        AtendimentoOutputDTO atendimentoOutputDTO = new AtendimentoOutputDTO();
-        atendimentoOutputDTO.setIdAtendimento(atendimento.getIdAtendimento());
+        AtendimentoOutputDTO atendimentoOutputDTO = objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class);
+
         atendimentoOutputDTO.setIdHospital(atendimento.getHospitalEntity().getIdHospital());
-        atendimentoOutputDTO.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
-        atendimentoOutputDTO.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
-        atendimentoOutputDTO.setLaudo(atendimento.getLaudo());
-        atendimentoOutputDTO.setValorDoAtendimento(atendimento.getValorDoAtendimento());
-        atendimentoOutputDTO.setTipoDeAtendimento(atendimento.getTipoDeAtendimento().name());
-        atendimentoOutputDTO.setDataAtendimento(atendimento.getDataAtendimento());
+
+        AtendimentoMedicoDTO medico = new AtendimentoMedicoDTO();
+        medico.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
+        medico.setNomeMedico(atendimento.getMedicoEntity().getPessoa().getNome());
+        atendimentoOutputDTO.setMedico(medico);
+
+        AtendimentoPacienteDTO paciente = new AtendimentoPacienteDTO();
+        paciente.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
+        paciente.setNomePaciente(atendimento.getPacienteEntity().getPessoa().getNome());
+        atendimentoOutputDTO.setPaciente(paciente);
 
         return atendimentoOutputDTO;
     }
