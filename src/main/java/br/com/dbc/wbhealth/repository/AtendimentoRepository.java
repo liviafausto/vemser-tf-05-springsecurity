@@ -3,6 +3,7 @@ package br.com.dbc.wbhealth.repository;
 import br.com.dbc.wbhealth.model.dto.relatorio.RelatorioLucro;
 import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
 import br.com.dbc.wbhealth.model.entity.MedicoEntity;
+import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,5 +38,8 @@ public interface AtendimentoRepository extends JpaRepository<AtendimentoEntity, 
             "GROUP BY a.tipoDeAtendimento")
     Page<RelatorioLucro> getLucroAteOMomento(@Param("tempoAtual") LocalDate tempoAtual, Pageable pageable); // Terminar
 
-    Page<AtendimentoEntity> findByMedicoEntityOrderByDataAtendimentoDesc(MedicoEntity medico, Pageable pageable);
+    Page<AtendimentoEntity> findByMedicoEntity(MedicoEntity medico, Pageable pageable);
+
+    Page<AtendimentoEntity> findByPacienteEntity(PacienteEntity paciente, Pageable pageable);
+
 }
