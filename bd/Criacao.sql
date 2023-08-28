@@ -2,6 +2,7 @@
 CREATE TABLE Hospital (
     id_hospital NUMBER(3) NOT NULL,
     nome VARCHAR2(50) NOT NULL,
+    cnpj VARCHAR2(14) NOT NULL UNIQUE,
      CONSTRAINT PK_HOSPITAL PRIMARY KEY(id_hospital)     
 );
 
@@ -90,7 +91,7 @@ CREATE TABLE Atendimento(
     id_paciente NUMBER(10) NOT NULL,
     id_medico NUMBER(10) NOT NULL,
     data_atendimento DATE NOT NULL,
-    laudo VARCHAR2(100) NOT NULL,
+    laudo VARCHAR2(100),
     tipo_de_atendimento VARCHAR2(10) NOT NULL,
     receita VARCHAR2(250),
     valor_atendimento NUMBER(7,2) NOT NULL,
