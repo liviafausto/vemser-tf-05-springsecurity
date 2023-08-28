@@ -15,6 +15,9 @@ public class HospitalAtendimentoDTO {
     @Schema(description = "Nome do Hospital")
     private String nome;
 
+    @Schema(description = "CNPJ do Hospital")
+    private String cnpj;
+
     @Schema(description = "Atendimentos do Hospital")
     private List<AtendimentoOutputDTO> atendimentos;
 }

@@ -17,4 +17,9 @@ public class HospitalInputDTO {
     @Size(min = 2, max = 50)
     @Schema(description = "Nome do Hospital", example = "Hospital Santa Maria", required = true)
     private String nome;
+
+    @NotBlank
+    @Size(min = 14, max = 14)
+    @Schema(description = "CNPJ do Hospital", example = "32187176000190", required = true)
+    private String cnpj;
 }
