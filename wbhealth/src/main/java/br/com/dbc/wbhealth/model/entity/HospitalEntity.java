@@ -26,6 +26,9 @@ public class HospitalEntity {
     @Column(name = "nome")
     private String nome;
 
+    @Column(name = "cnpj")
+    private String cnpj;
+
     @JsonIgnore
     @OneToMany(mappedBy = "hospitalEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AtendimentoEntity> atendimentos;
