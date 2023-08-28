@@ -18,4 +18,7 @@ public class HospitalOutputDTO {
     @Schema(description = "Nome do Hospital", example = "Santa luzia")
     private String nome;
 
+    @Schema(description = "CNPJ do Hospital", example = "32187176000190")
+    private String cnpj;
+
 }
